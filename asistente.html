@@ -1,0 +1,3613 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b10">
+  <meta name="description" content="Asistente de inteligencia artificial de BrainMach.">
+  <title>Asistente IA | BrainMach</title>
+  <script>
+    if (["localhost", "127.0.0.1"].includes(location.hostname) && location.port !== "3000") {
+      location.replace(`http://${location.hostname}:3000${location.pathname}${location.search}${location.hash}`);
+    }
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #080b10;
+      --panel: #10151d;
+      --panel-raised: #151d27;
+      --line: #26313d;
+      --white: #f2f6fb;
+      --muted: #a5b0bf;
+      --blue: #16b8ff;
+      --cyan: #65e8ff;
+      --pink: #fc69bd;
+      --lime: #cbff83;
+      font-family: "Aptos", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { position: relative; isolation: isolate; min-width: 320px; min-height: 100vh; margin: 0; color: var(--white); background: var(--ink); }
+    .wallpaper-video { position: fixed; z-index: -1; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+    body::before { position: fixed; z-index: -1; inset: 0; background-image: linear-gradient(rgba(8, 11, 16, .82), rgba(8, 11, 16, .9)), url("BrainMach Cybernetic Emblem.png"); background-position: center; background-size: cover, min(100vh, 100vw, 900px) auto; background-attachment: fixed; content: ""; pointer-events: none; }
+    body.has-custom-wallpaper { background-image: linear-gradient(rgba(8, 11, 16, .72), rgba(8, 11, 16, .82)), var(--assistant-wallpaper); background-position: center; background-size: cover; background-attachment: fixed; }
+    body.has-custom-wallpaper::before { display: none; }
+    .wallpaper-video[hidden] { display: none; }
+    .auth-gate[hidden], .app[hidden] { display: none; }
+    .auth-gate { position: fixed; z-index: 300; inset: 0; display: grid; place-items: center; overflow-y: auto; padding: 18px; background: rgba(3, 7, 13, .86); backdrop-filter: blur(14px); }
+    .auth-card { width: min(940px, 100%); max-height: min(900px, calc(100dvh - 36px)); display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; border: 1px solid rgba(101, 232, 255, .35); background: rgba(12, 17, 26, .97); box-shadow: 0 28px 90px rgba(0,0,0,.55), 0 0 36px rgba(22,184,255,.1); }
+    .auth-header { padding: 22px 26px 15px; border-bottom: 1px solid rgba(201,210,220,.1); }
+    .auth-brand { margin: 0; color: var(--white); font-size: 19px; font-weight: 800; letter-spacing: .03em; }
+    .auth-brand span { color: var(--blue); }
+    .auth-tagline { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .auth-form { min-height: 0; display: grid; grid-template-columns: minmax(230px, .75fr) minmax(0, 1.25fr); }
+    .auth-fields { display: flex; flex-direction: column; gap: 12px; padding: 25px; }
+    .auth-fields h1 { margin: 0; color: var(--white); font-size: 23px; }
+    .auth-fields > p { margin: -5px 0 5px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .auth-field { display: grid; gap: 6px; color: #c9d4df; font-size: 12px; font-weight: 650; }
+    .auth-field[hidden] { display: none; }
+    .auth-field input { width: 100%; min-height: 42px; padding: 10px 11px; border: 1px solid #344454; outline: 0; background: #080e16; color: var(--white); font: inherit; font-size: 13px; }
+    .auth-field input:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(101,232,255,.1); }
+    .auth-status { min-height: 34px; margin: auto 0 0; color: #ff9a9a; font-size: 12px; line-height: 1.45; }
+    .auth-status:empty { min-height: 0; }
+    .auth-submit { min-height: 44px; padding: 10px 14px; border: 1px solid var(--blue); background: var(--blue); color: #03111b; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+    .auth-submit:hover:not(:disabled) { background: #65d1ff; }
+    .auth-submit:disabled { opacity: .48; cursor: not-allowed; }
+    .account-ban[hidden] { display: none; }
+    .account-ban { position: fixed; z-index: 500; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(3, 7, 13, .96); }
+    .account-ban-card { width: min(520px, 100%); padding: 28px; border: 1px solid rgba(255, 108, 120, .5); background: #0c111a; box-shadow: 0 24px 70px rgba(0,0,0,.55); }
+    .account-ban-card h1 { margin: 0 0 12px; color: #ff9a9a; font-size: 24px; }
+    .account-ban-card p { margin: 0; color: #c1cbd7; font-size: 14px; line-height: 1.6; }
+    .auth-terms { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px; padding: 22px 24px; border-left: 1px solid rgba(201,210,220,.1); }
+    .auth-terms h2 { margin: 0; color: var(--white); font-size: 16px; }
+    .auth-terms-scroll { min-height: 0; overflow-y: auto; padding: 12px; border: 1px solid rgba(201,210,220,.12); background: rgba(5,9,15,.55); color: #c1cbd7; font-size: 12px; line-height: 1.7; scrollbar-color: #3e6172 transparent; }
+    .auth-terms-scroll p { margin: 0; }
+    .auth-consent { display: flex; align-items: flex-start; gap: 9px; color: #d7e0e9; font-size: 11px; line-height: 1.5; }
+    .auth-consent input { flex: 0 0 auto; width: 16px; height: 16px; margin: 1px 0 0; accent-color: var(--blue); }
+    .auth-terms-note { margin: -4px 0 0; color: #91a0b2; font-size: 10px; line-height: 1.4; }
+    button, textarea { font: inherit; }
+    button { color: inherit; }
+    .app { min-height: 100vh; }
+    .sidebar { position: fixed; z-index: 20; inset: 0 auto 0 0; width: min(290px, calc(100vw - 48px)); display: flex; flex-direction: column; gap: 22px; overflow-y: auto; padding: 22px 16px; border-right: 1px solid var(--line); background: #0c1118; transform: translateX(-102%); transition: transform .32s cubic-bezier(.2, .8, .2, 1), visibility .32s; visibility: hidden; }
+    .app.sidebar-open .sidebar { transform: translateX(0); visibility: visible; }
+    .sidebar-backdrop { position: fixed; z-index: 19; inset: 0; border: 0; background: rgba(0, 0, 0, .56); opacity: 0; visibility: hidden; transition: opacity .32s ease, visibility .32s; }
+    .app.sidebar-open .sidebar-backdrop { opacity: 1; visibility: visible; }
+    .brand-row { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
+    .wordmark { font-size: 17px; font-weight: 800; letter-spacing: .04em; }
+    .wordmark span { color: var(--blue); }
+    .back-link { color: var(--muted); font-size: 12px; }
+    .back-link:hover { color: var(--white); }
+    .new-chat { min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 13px; border: 1px solid #344454; background: transparent; text-align: left; cursor: pointer; }
+    .new-chat:hover { border-color: var(--blue); background: rgba(22, 184, 255, .07); }
+    .plus { color: var(--cyan); font-size: 20px; line-height: 1; }
+    .history-label { margin: 0 9px 9px; color: #7f8c9b; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .history-item { width: 100%; overflow: hidden; padding: 10px 11px; border: 0; background: transparent; color: var(--muted); text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+    .history-item:hover, .history-item.active { background: #171f29; color: var(--white); }
+    .conversation-history { display: grid; gap: 3px; max-height: 32vh; overflow-y: auto; }
+    .conversation-entry { min-width: 0; display: flex; align-items: center; gap: 3px; }
+    .conversation-open { min-width: 0; flex: 1; overflow: hidden; padding: 9px 10px; border: 0; background: transparent; color: var(--muted); text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+    .conversation-open:hover, .conversation-entry.active .conversation-open { background: #171f29; color: var(--white); }
+    .conversation-delete { flex: 0 0 32px; width: 32px; height: 32px; border: 0; background: transparent; color: #8794a3; font-size: 17px; cursor: pointer; }
+    .conversation-delete:hover { background: rgba(255, 90, 110, .1); color: #ff8290; }
+    .conversation-delete:focus-visible, .conversation-open:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+    .conversation-history-status { margin: 0 9px; color: #8794a3; font-size: 11px; line-height: 1.5; }
+    .module-panel { display: flex; flex-direction: column; gap: 10px; }
+    .module-list { display: grid; gap: 8px; max-height: min(48vh, 420px); overflow-y: auto; }
+    .module-card { border: 1px solid #26313d; background: #10151d; }
+    .module-heading { display: flex; align-items: center; }
+    .module-expand { min-width: 0; flex: 1; display: flex; align-items: center; gap: 10px; padding: 11px 10px; border: 0; background: transparent; color: var(--white); text-align: left; font-size: 13px; cursor: pointer; }
+    .module-expand:hover { background: #151d27; }
+    .module-chevron { color: var(--cyan); transition: transform .24s ease; }
+    .module-card.expanded .module-chevron { transform: rotate(90deg); }
+    .module-delete { width: 36px; height: 36px; margin-right: 5px; border: 0; background: transparent; color: #8794a3; font-size: 17px; cursor: pointer; }
+    .module-delete:hover { background: rgba(255, 90, 110, .1); color: #ff8290; }
+    .module-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .32s cubic-bezier(.2, .8, .2, 1); }
+    .module-card.expanded .module-content { grid-template-rows: 1fr; }
+    .module-content-inner { min-height: 0; overflow: hidden; opacity: 0; transform: translateY(-5px); transition: opacity .22s ease, transform .32s cubic-bezier(.2, .8, .2, 1); }
+    .module-card.expanded .module-content-inner { opacity: 1; transform: translateY(0); }
+    .problem-list { display: grid; gap: 4px; max-height: 190px; overflow-y: auto; padding: 0 7px; }
+    .problem-item { padding: 9px 10px; border: 1px solid transparent; background: transparent; color: var(--muted); text-align: left; font-size: 12px; line-height: 1.45; cursor: pointer; }
+    .problem-item:hover { border-color: #344454; background: #151d27; color: var(--white); }
+    .problem-item.generated-problem::before { display: block; margin-bottom: 4px; color: var(--cyan); font-size: 9px; font-weight: 700; letter-spacing: .08em; content: "PROBLEMA COTIDIANO · IA"; }
+    .empty-problems, .module-status { margin: 0; color: #8794a3; font-size: 11px; line-height: 1.5; }
+    .module-form, .problem-form { display: flex; gap: 6px; }
+    .module-input { width: 100%; min-width: 0; flex: 1; padding: 10px; border: 1px solid #344454; border-radius: 0; background: #111821; color: var(--white); font: inherit; font-size: 13px; }
+    .problem-form { padding: 8px; }
+    .problem-form .module-input { padding: 8px; font-size: 12px; }
+    .module-add { width: 38px; flex: 0 0 38px; border: 1px solid #344454; background: transparent; color: var(--cyan); font-size: 18px; cursor: pointer; }
+    .module-add:hover { border-color: var(--blue); background: rgba(22, 184, 255, .07); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .sidebar-note { margin-top: auto; padding: 13px; border-top: 1px solid var(--line); color: #8794a3; font-size: 12px; line-height: 1.6; }
+    .workspace { min-width: 0; min-height: 100vh; display: grid; grid-template-rows: 64px minmax(0, 1fr); }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 24px; border-bottom: 1px solid rgba(201, 210, 220, .1); }
+    .topbar-end { position: relative; flex: 0 0 auto; display: flex; align-items: center; gap: 13px; }
+    .model-tag { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .user-profile-button { position: relative; width: 48px; height: 48px; flex: 0 0 48px; display: grid; place-items: center; padding: 0; border: 0; background: transparent; cursor: pointer; }
+    .user-profile-button:hover, .user-profile-button[aria-expanded="true"] { filter: drop-shadow(0 0 7px rgba(22,184,255,.5)); }
+    .user-avatar-gear { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: #65e8ff; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(22,184,255,.7)); animation: streak-gear-turn 8s linear infinite; }
+    .user-avatar-photo, .user-avatar-placeholder { position: relative; z-index: 1; width: 29px; height: 29px; overflow: hidden; border-radius: 50%; background: #101923; }
+    .user-avatar-photo { object-fit: cover; border: 1px solid rgba(217,251,255,.72); }
+    .user-avatar-placeholder { display: grid; place-items: center; color: var(--cyan); }
+    .user-avatar-placeholder svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .user-profile-menu { position: absolute; z-index: 40; top: calc(100% + 10px); right: 0; width: min(250px, calc(100vw - 24px)); display: grid; gap: 6px; padding: 12px; border: 1px solid #344454; background: rgba(12,17,24,.98); box-shadow: 0 14px 36px rgba(0,0,0,.5); }
+    .user-profile-menu[hidden] { display: none; }
+    .user-profile-name { overflow: hidden; margin: 0 0 4px; color: var(--white); font-size: 13px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+    .user-profile-username { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 400; }
+    .user-profile-menu button { min-height: 36px; padding: 7px 9px; border: 1px solid transparent; background: transparent; color: #c1cbd7; font: inherit; font-size: 12px; text-align: left; cursor: pointer; }
+    .user-profile-menu button:hover { border-color: #344454; background: #151d27; color: var(--white); }
+    .user-profile-menu .user-logout { color: #ff9a9a; }
+    .user-profile-status { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.4; }
+    .user-profile-status[data-state="error"] { color: #ff9a9a; }
+    .topbar-start { position: relative; display: flex; align-items: center; gap: 14px; }
+    .sidebar-toggle { width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
+    .sidebar-toggle:hover, .sidebar-toggle[aria-expanded="true"] { border-color: #344454; background: #111821; color: var(--white); }
+    .menu-icon { width: 20px; display: grid; gap: 5px; }
+    .menu-icon span { display: block; width: 20px; height: 2px; border-radius: 2px; background: currentColor; transition: transform .28s ease, opacity .2s ease, width .28s ease; }
+    .menu-icon span:nth-child(2) { width: 14px; }
+    .sidebar-toggle[aria-expanded="true"] .menu-icon span:first-child { transform: translateY(7px) rotate(45deg); }
+    .sidebar-toggle[aria-expanded="true"] .menu-icon span:nth-child(2) { width: 20px; opacity: 0; }
+    .sidebar-toggle[aria-expanded="true"] .menu-icon span:last-child { transform: translateY(-7px) rotate(-45deg); }
+    .study-streak-button { min-height: 36px; display: inline-flex; align-items: center; gap: 7px; padding: 4px 9px; border: 0; background: transparent; color: var(--white); font: inherit; cursor: pointer; transition: background .2s, box-shadow .2s; }
+    .study-streak-button:hover, .study-streak-button[aria-expanded="true"] { background: rgba(22, 184, 255, .08); box-shadow: 0 0 14px rgba(22, 184, 255, .1); }
+    .streak-icon { position: relative; width: 25px; height: 25px; display: grid; place-items: center; }
+    .streak-gear { width: 23px; height: 23px; fill: #ff9b46; filter: drop-shadow(0 0 4px rgba(255,115,37,.55)); animation: streak-gear-turn 8s linear infinite; }
+    .streak-flame { position: absolute; top: -5px; right: -5px; width: 15px; height: 18px; fill: #ffcf52; filter: drop-shadow(0 0 5px rgba(255,95,34,.8)); transform-origin: 50% 90%; animation: streak-flame-flicker .8s ease-in-out infinite alternate; }
+    .streak-count { min-width: 13px; color: #ffc274; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .streak-panel { position: absolute; z-index: 30; top: calc(100% + 10px); left: 52px; width: min(300px, calc(100vw - 24px)); padding: 16px; border: 1px solid #61432e; background: #111821; box-shadow: 0 16px 40px rgba(0,0,0,.5), 0 0 22px rgba(255,115,37,.12); }
+    .streak-panel[hidden] { display: none; }
+    .streak-panel h2 { margin: 0; color: var(--white); font-size: 15px; }
+    .streak-total { display: flex; align-items: baseline; gap: 7px; margin: 12px 0 3px; }
+    .streak-total strong { color: #ffad52; font-size: 36px; line-height: 1; }
+    .streak-total span, .streak-record, .streak-guidance { color: var(--muted); font-size: 12px; }
+    .streak-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin-top: 15px; }
+    .streak-day { display: grid; justify-items: center; gap: 5px; color: #8794a3; font-size: 9px; }
+    .streak-day-mark { width: 27px; height: 27px; display: grid; place-items: center; border: 1px solid #344454; border-radius: 50%; color: #8794a3; font-size: 11px; }
+    .streak-day.active .streak-day-mark { border-color: #ff9a43; background: rgba(255,132,48,.16); color: #ffc274; font-size: 14px; box-shadow: 0 0 10px rgba(255,115,37,.2); }
+    .streak-day.today { color: var(--white); font-weight: 700; }
+    .streak-day.today .streak-day-mark { border-width: 2px; }
+    .streak-record { margin: 12px 0 0; }
+    .streak-guidance { margin: 9px 0 0; line-height: 1.45; }
+    .streak-guidance[data-state="error"] { color: #ff8290; }
+    .learning-progress-button { position: relative; min-width: 220px; display: grid; gap: 5px; padding: 6px 9px; border: 0; background: transparent; color: var(--white); font: inherit; text-align: left; cursor: pointer; transition: background .2s, box-shadow .2s; }
+    .learning-progress-button:hover, .learning-progress-button[aria-expanded="true"] { background: rgba(22, 184, 255, .08); box-shadow: 0 0 17px rgba(91, 112, 255, .16); }
+    .learning-progress-summary { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .learning-progress-track, .module-progress-track { height: 8px; overflow: hidden; border: 0; border-radius: 999px; background: rgba(7, 12, 28, .62); box-shadow: inset 0 1px 3px rgba(0,0,0,.4); }
+    .learning-progress-fill, .module-progress-fill { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #24c9ff, #6388ff 55%, #c36bff); box-shadow: 0 0 10px rgba(106, 123, 255, .85); transition: width .45s cubic-bezier(.2, .8, .2, 1); }
+    .learning-progress-fill { position: relative; }
+    .learning-progress-fill::after { position: absolute; top: -3px; right: -1px; bottom: -3px; width: 20px; border-radius: 50%; background: radial-gradient(ellipse at 100% 50%, rgba(255,255,255,.98), rgba(174,235,255,.9) 16%, rgba(73,207,255,.48) 45%, transparent 78%); filter: drop-shadow(0 0 5px rgba(102, 221, 255, .95)); content: ""; opacity: 0; }
+    .learning-progress-fill.has-progress::after { animation: progress-tip-glow 1.4s ease-in-out infinite alternate; }
+    .learning-progress-panel { position: absolute; z-index: 31; top: calc(100% + 10px); left: 52px; width: min(360px, calc(100vw - 24px)); max-height: min(65vh, 500px); overflow-y: auto; padding: 16px; border: 1px solid rgba(133, 129, 255, .5); background: rgba(12, 17, 30, .94); box-shadow: 0 16px 40px rgba(0,0,0,.5), 0 0 24px rgba(91,112,255,.14); backdrop-filter: blur(16px); }
+    .learning-progress-panel[hidden] { display: none; }
+    .learning-progress-panel h2 { margin: 0; color: var(--white); font-size: 15px; }
+    .learning-progress-help { margin: 7px 0 14px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .learning-module-list { display: grid; gap: 12px; }
+    .learning-module-row { display: grid; gap: 6px; padding: 10px; border: 1px solid rgba(133, 149, 190, .18); background: rgba(25, 34, 55, .4); }
+    .learning-module-heading, .learning-module-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .learning-module-name { overflow: hidden; color: var(--white); font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .learning-module-level { flex: 0 0 auto; color: #c4b8ff; font-size: 11px; font-weight: 700; }
+    .learning-module-meta, .learning-module-test-note { color: var(--muted); font-size: 10px; }
+    .learning-module-test { justify-self: start; padding: 6px 9px; border: 1px solid rgba(101, 232, 255, .5); background: rgba(44, 77, 126, .38); color: #c5f6ff; font: inherit; font-size: 11px; cursor: pointer; }
+    .learning-module-test:hover { border-color: var(--cyan); background: rgba(44, 95, 155, .55); }
+    .learning-module-empty { margin: 0; color: var(--muted); font-size: 12px; }
+    .wallpaper-controls { display: grid; gap: 9px; margin-top: 14px; padding-top: 13px; border-top: 1px solid rgba(133, 149, 190, .2); }
+    .wallpaper-status { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .wallpaper-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+    .wallpaper-actions button { min-height: 34px; padding: 6px 9px; border: 1px solid rgba(101, 232, 255, .5); background: rgba(44, 77, 126, .38); color: #c5f6ff; font: inherit; font-size: 11px; cursor: pointer; }
+    .wallpaper-actions button:hover:not(:disabled) { border-color: var(--cyan); background: rgba(44, 95, 155, .55); }
+    .wallpaper-actions button:disabled { opacity: .55; cursor: not-allowed; }
+    .toolbox { position: fixed; z-index: 30; right: 22px; bottom: 94px; display: grid; justify-items: end; gap: 12px; }
+    .toolbox-toggle { width: 56px; height: 56px; display: grid; place-items: center; border: 1px solid rgba(101, 232, 255, .55); border-radius: 50%; background: #111821; color: var(--cyan); box-shadow: 0 0 22px rgba(22, 184, 255, .2); cursor: pointer; transition: border-color .2s, background .2s, color .2s, transform .2s; }
+    .toolbox-toggle:hover, .toolbox-toggle[aria-expanded="true"] { border-color: var(--cyan); background: #182531; color: var(--white); }
+    .toolbox-toggle[aria-expanded="true"] svg { transform: rotate(45deg); }
+    .toolbox-toggle svg { width: 27px; height: 27px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s ease; }
+    .toolbox-panel { width: min(270px, calc(100vw - 32px)); display: grid; gap: 6px; padding: 12px; border: 1px solid #344454; background: rgba(12, 17, 24, .97); box-shadow: 0 12px 36px rgba(0, 0, 0, .45); backdrop-filter: blur(12px); }
+    .toolbox-panel[hidden] { display: none; }
+    .toolbox-title { margin: 0 0 4px; padding: 0 7px 8px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .graph-shortcut { width: 100%; display: flex; align-items: center; gap: 12px; padding: 8px; border: 1px solid transparent; background: transparent; color: var(--muted); font: inherit; font-size: 13px; line-height: 1.25; text-align: left; cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
+    .graph-shortcut:hover, .graph-shortcut:focus-visible { border-color: #344454; background: #151d27; color: var(--white); }
+    .graph-shortcut-orb { position: relative; width: 42px; flex: 0 0 42px; aspect-ratio: 1; display: grid; place-items: center; isolation: isolate; transition: transform .24s ease; }
+    .graph-shortcut:hover .graph-shortcut-orb, .graph-shortcut:focus-visible .graph-shortcut-orb { transform: scale(1.09); }
+    .graph-shortcut-orb::before, .graph-shortcut-orb::after { position: absolute; inset: 0; border-radius: 50%; content: ""; }
+    .graph-shortcut-orb::before { z-index: -2; background: conic-gradient(from 20deg, var(--cyan), #3288ff 20%, var(--pink) 43%, #ffb669 58%, var(--lime) 74%, var(--cyan)); filter: blur(11px); opacity: .78; animation: drift 7s linear infinite; }
+    .graph-shortcut-orb::after { z-index: -1; inset: 5px; background: conic-gradient(from 210deg, rgba(22, 184, 255, .94), rgba(252, 105, 189, .9), rgba(203, 255, 131, .9), rgba(22, 184, 255, .94)); filter: blur(7px); opacity: .92; animation: breathe 4.2s ease-in-out infinite alternate; }
+    .graph-shortcut-core { width: 30px; aspect-ratio: 1; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, .45); border-radius: 50%; background: radial-gradient(circle at 35% 27%, rgba(255,255,255,.94), rgba(101,232,255,.8) 14%, rgba(53,137,255,.82) 42%, rgba(252,105,189,.64) 67%, rgba(8,11,16,.85) 100%); box-shadow: 0 0 20px rgba(22,184,255,.48), inset 0 0 14px rgba(255,255,255,.3); color: #fff; animation: pulse 3.1s ease-in-out infinite; }
+    .graph-shortcut-core svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .graph-shortcut-symbol { font-size: 13px; font-weight: 700; }
+    .graph-shortcut-label { flex: 1; }
+    .assistant-name { font-size: 14px; font-weight: 700; }
+    .model-tag { color: var(--muted); font-size: 12px; }
+    .online { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 12px rgba(203, 255, 131, .55); }
+    .main-content { width: min(880px, 100%); min-height: 0; display: flex; flex-direction: column; justify-content: center; margin-inline: auto; padding: 32px 28px 24px; }
+    .welcome { display: flex; flex-direction: column; align-items: center; text-align: center; animation: arrive .7s ease-out both; }
+    .welcome[hidden] { display: none; }
+    .tour-start-button { margin-top: 20px; padding: 10px 17px; border: 1px solid rgba(101, 232, 255, .45); border-radius: 999px; background: rgba(22, 184, 255, .08); color: #d7f7ff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
+    .tour-start-button:hover { transform: translateY(-2px); border-color: var(--cyan); background: rgba(22, 184, 255, .16); }
+    .aura-wrap { position: relative; width: 212px; aspect-ratio: 1; display: grid; place-items: center; margin: 1px 0 22px; isolation: isolate; }
+    .gear-cluster { position: absolute; top: 50%; left: 50%; width: 212px; height: 212px; transform: translate(-50%, -50%); }
+    .gear-cluster::before { position: absolute; inset: 24px; z-index: -1; border-radius: 50%; background: radial-gradient(circle, rgba(22,184,255,.22), rgba(22,184,255,.07) 48%, transparent 72%); filter: blur(12px); animation: gear-energy 2.4s ease-in-out infinite alternate; content: ""; }
+    .gear { position: absolute; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; }
+    .gear-main { top: 62px; left: 62px; z-index: 2; width: 88px; animation: gear-turn 24s linear infinite; }
+    .gear-secondary { z-index: 3; width: 62px; animation: gear-turn-reverse 24s linear infinite; }
+    .gear-left { top: 75px; left: 0; }
+    .gear-upper-right { top: 22px; left: 128px; }
+    .gear-lower-right { top: 128px; left: 128px; z-index: 1; }
+    .gear::before, .gear-tooth { border: 1px solid rgba(217,251,255,.62); background: linear-gradient(145deg, #d9fbff 0%, #65e8ff 22%, #3589ff 58%, #b34eae 100%); box-shadow: 0 0 12px rgba(22,184,255,.3), inset 0 2px 3px rgba(255,255,255,.35), inset 0 -3px 4px rgba(14,48,120,.35); }
+    .gear::before { position: absolute; inset: 14%; border-radius: 50%; content: ""; }
+    .gear::after { position: absolute; inset: 39%; z-index: 1; border: 2px solid rgba(101,232,255,.9); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #263b5d, #080e1a 72%); box-shadow: 0 0 10px rgba(22,184,255,.4), inset 0 1px 3px rgba(255,255,255,.18); content: ""; }
+    .gear-tooth { position: absolute; top: -3%; left: 43%; width: 14%; height: 22%; border-radius: 2px; transform-origin: 50% 240%; }
+    .gear-tooth:nth-child(1) { transform: rotate(0deg); }
+    .gear-tooth:nth-child(2) { transform: rotate(30deg); }
+    .gear-tooth:nth-child(3) { transform: rotate(60deg); }
+    .gear-tooth:nth-child(4) { transform: rotate(90deg); }
+    .gear-tooth:nth-child(5) { transform: rotate(120deg); }
+    .gear-tooth:nth-child(6) { transform: rotate(150deg); }
+    .gear-tooth:nth-child(7) { transform: rotate(180deg); }
+    .gear-tooth:nth-child(8) { transform: rotate(210deg); }
+    .gear-tooth:nth-child(9) { transform: rotate(240deg); }
+    .gear-tooth:nth-child(10) { transform: rotate(270deg); }
+    .gear-tooth:nth-child(11) { transform: rotate(300deg); }
+    .gear-tooth:nth-child(12) { transform: rotate(330deg); }
+    .gear-secondary .gear-tooth { top: -2%; left: 41.5%; width: 17%; height: 23%; transform-origin: 50% 230%; }
+    .gear-secondary .gear-tooth:nth-child(1) { transform: rotate(0deg); }
+    .gear-secondary .gear-tooth:nth-child(2) { transform: rotate(45deg); }
+    .gear-secondary .gear-tooth:nth-child(3) { transform: rotate(90deg); }
+    .gear-secondary .gear-tooth:nth-child(4) { transform: rotate(135deg); }
+    .gear-secondary .gear-tooth:nth-child(5) { transform: rotate(180deg); }
+    .gear-secondary .gear-tooth:nth-child(6) { transform: rotate(225deg); }
+    .gear-secondary .gear-tooth:nth-child(7) { transform: rotate(270deg); }
+    .gear-secondary .gear-tooth:nth-child(8) { transform: rotate(315deg); }
+    h1 { margin: 0; font-size: clamp(29px, 4vw, 42px); line-height: 1.12; font-weight: 650; }
+    .subtitle { max-width: 470px; margin: 12px 0 0; color: var(--muted); font-size: 15px; line-height: 1.6; }
+    .suggestions { width: min(690px, 100%); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 32px auto 0; }
+    .suggestion { min-height: 62px; padding: 12px 14px; border: 1px solid #293644; background: rgba(16, 21, 29, .78); color: #d7e0e9; text-align: left; line-height: 1.4; cursor: pointer; transition: border-color .2s, background .2s; }
+    .suggestion:hover { border-color: #4a829c; background: #121d27; }
+    .conversation { display: none; width: min(690px, 100%); min-height: 0; margin: 34px auto 0; }
+    .conversation.visible { display: flex; flex: 1 1 auto; flex-direction: column; gap: 16px; overflow-y: auto; overscroll-behavior: contain; }
+    .message { max-width: 88%; padding: 13px 16px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; animation: message-arrive .32s ease-out both; }
+    .message.user { align-self: flex-end; border: 1px solid #174d68; background: #102635; }
+    .message.assistant { align-self: flex-start; border-left: 2px solid var(--blue); color: #c6d0db; }
+    .message.assistant.typing::after { display: inline-block; width: 7px; height: 1em; margin-left: 3px; background: var(--cyan); vertical-align: text-bottom; content: ""; animation: typing-cursor .8s steps(2, start) infinite; }
+    @keyframes typing-cursor { to { visibility: hidden; } }
+    @media (prefers-reduced-motion: reduce) { .message.assistant.typing::after { animation: none; } }
+    .message.assistant p { margin: 0 0 .8em; }
+    .message.assistant p:last-child { margin-bottom: 0; }
+    .message.assistant ul, .message.assistant ol { margin: 0 0 .8em; padding-left: 1.5em; }
+    .message.assistant strong { color: var(--white); }
+    .assistant-speech-button { min-height: 32px; display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; padding: 5px 11px; border: 1px solid rgba(151, 165, 184, .22); border-radius: 999px; background: rgba(255,255,255,.035); color: #b8c5d3; font: inherit; font-size: 11px; cursor: pointer; transition: background .18s, border-color .18s, color .18s; }
+    .assistant-speech-button:hover:not(:disabled) { border-color: rgba(101,232,255,.5); background: rgba(22,184,255,.08); color: var(--white); }
+    .assistant-speech-button:disabled { opacity: .48; cursor: default; }
+    .assistant-speech-status { margin: 5px 0 0; color: #ff9a9a; font-size: 11px; }
+    .assistant-speech-status:empty { display: none; }
+    .message.assistant code { padding: .08em .3em; border-radius: 4px; background: rgba(130, 155, 190, .16); color: #aeeaff; font-family: Consolas, monospace; font-size: .92em; }
+    .message.assistant pre { max-width: 100%; margin: .65em 0; padding: 12px 14px; overflow-x: auto; border: 1px solid rgba(151, 165, 184, .16); border-radius: 10px; background: #10151d; color: #d7e0e9; white-space: pre; }
+    .message.assistant pre code { display: block; padding: 0; background: transparent; color: inherit; font-size: 12px; line-height: 1.55; }
+    .message.assistant .code-language { display: block; margin-bottom: 7px; color: #91a0b2; font-family: "Aptos", "Segoe UI", sans-serif; font-size: 10px; text-transform: uppercase; }
+    .message.assistant .math-inline { color: #d7ceff; font-family: "Cambria Math", "Times New Roman", serif; font-style: italic; }
+    .message.assistant .math-block { margin: .65em 0; padding: .45em .75em; border-left: 2px solid rgba(101, 232, 255, .48); background: rgba(22, 184, 255, .055); color: #e2e8ff; font-family: "Cambria Math", "Times New Roman", serif; font-size: 1.05em; text-align: center; white-space: pre-wrap; }
+    .chat-tour[hidden] { display: none; }
+    .chat-tour { position: fixed; z-index: 200; inset: 0; }
+    .chat-tour-backdrop { position: absolute; inset: 0; background: transparent; }
+    .chat-tour-spotlight { position: fixed; z-index: 1; border: 2px solid var(--cyan); border-radius: 14px; background: transparent; box-shadow: 0 0 0 3px rgba(101, 232, 255, .2), 0 0 28px rgba(22, 184, 255, .42), 0 0 0 9999px rgba(2, 5, 10, .78); pointer-events: none; transition: top .28s ease, left .28s ease, width .28s ease, height .28s ease; animation: tour-pulse 1.8s ease-in-out infinite; }
+    .chat-tour-card { position: fixed; z-index: 2; width: min(360px, calc(100vw - 28px)); padding: 17px; border: 1px solid rgba(101, 232, 255, .42); border-radius: 18px; background: #111821; box-shadow: 0 18px 55px rgba(0,0,0,.58), 0 0 28px rgba(22,184,255,.13); animation: tour-card-arrive .25s ease-out both; }
+    .chat-tour-kicker { margin: 0 0 6px; color: var(--cyan); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .chat-tour-card h2 { margin: 0 0 7px; color: var(--white); font-size: 17px; }
+    .chat-tour-description { margin: 0; color: #c1cbd7; font-size: 13px; line-height: 1.55; }
+    .chat-tour-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 15px; }
+    .chat-tour-count { color: #92a0b0; font-size: 11px; }
+    .chat-tour-actions { display: flex; gap: 7px; }
+    .chat-tour-actions button { min-height: 34px; padding: 6px 11px; border: 1px solid rgba(151, 165, 184, .24); border-radius: 999px; background: #1b2530; color: var(--white); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .chat-tour-actions button:hover:not(:disabled) { border-color: var(--cyan); background: #243543; }
+    .chat-tour-actions button:disabled { opacity: .4; cursor: default; }
+    .chat-tour-actions .chat-tour-next { border-color: #e8f7ff; background: #e8f7ff; color: #101820; }
+    .chat-tour-actions .chat-tour-next:hover { background: #fff; }
+    @keyframes tour-pulse { 50% { box-shadow: 0 0 0 5px rgba(101, 232, 255, .13), 0 0 34px rgba(22, 184, 255, .6), 0 0 0 9999px rgba(2, 5, 10, .8); } }
+    @keyframes tour-card-arrive { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .message.response-arrive { animation-name: message-arrive; animation-duration: .42s; }
+    .message.loading { display: flex; align-items: center; min-height: 47px; animation: none; }
+    .geometry-tool, .graph-tool { position: relative; }
+    .tool-close { position: absolute; top: 8px; right: 8px; z-index: 1; width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 1px solid #344454; background: #151d27; color: var(--muted); font-size: 22px; line-height: 1; cursor: pointer; transition: border-color .2s, color .2s, background .2s; }
+    .tool-close:hover, .tool-close:focus-visible { border-color: var(--blue); background: #1b2a37; color: var(--white); }
+    .geometry-tool { width: min(100%, 520px); max-width: 100%; padding: 16px; border: 1px solid #293644; background: #10151d; white-space: normal; }
+    .geometry-title { margin: 0 38px 6px 0; color: var(--white); font-size: 15px; }
+    .geometry-help { margin: 0 0 14px; color: var(--muted); font-size: 12px; }
+    .geometry-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .geometry-field { display: grid; gap: 5px; color: var(--muted); font-size: 11px; }
+    .geometry-field input { width: 100%; min-width: 0; padding: 9px; border: 1px solid #344454; background: #080b10; color: var(--white); font: inherit; font-size: 13px; }
+    .geometry-figure { margin: 12px 0 8px; padding: 8px; border: 1px solid rgba(201, 210, 220, .1); background: #0c1118; }
+    .geometry-svg { display: block; width: min(100%, 340px); height: auto; margin: auto; overflow: visible; }
+    .triangle-shape { transform-box: view-box; transform-origin: center; transition: transform .35s cubic-bezier(.2, .8, .2, 1); }
+    .triangle-fill { fill: rgba(22, 184, 255, .12); stroke: var(--cyan); stroke-width: 3; stroke-linejoin: round; }
+    .triangle-angle { fill: none; stroke: var(--pink); stroke-width: 2; }
+    .triangle-label { fill: var(--white); font: 600 14px "Segoe UI", sans-serif; }
+    .rotation-controls { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 9px; color: var(--muted); font-size: 11px; }
+    .rotation-controls input { width: 100%; accent-color: var(--blue); }
+    .rotate-button, .geometry-calculate, .geometry-send { min-height: 36px; padding: 7px 10px; border: 1px solid #344454; background: #151d27; color: var(--white); font: inherit; font-size: 12px; cursor: pointer; }
+    .rotate-button:hover, .geometry-calculate:hover { border-color: var(--blue); }
+    .geometry-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+    .geometry-send { border-color: var(--blue); background: var(--blue); color: #06121a; font-weight: 700; }
+    .geometry-send:disabled { opacity: .45; cursor: default; }
+    .geometry-status { flex: 1 1 100%; min-height: 18px; margin: 0; color: var(--muted); font-size: 12px; }
+    .geometry-status[data-state="error"] { color: #ff8290; }
+    .geometry-status[data-state="success"] { color: var(--lime); }
+    .graph-tool { width: min(100%, 680px); max-width: 100%; padding: 16px; border: 1px solid #293644; background: #10151d; white-space: normal; }
+    .graph-title { margin: 0 38px 5px 0; color: var(--white); font-size: 16px; }
+    .graph-description { margin: 0 0 14px; color: var(--muted); font-size: 12px; }
+    .graph-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(205px, .75fr); gap: 12px; align-items: start; }
+    .graph-canvas-wrap { min-width: 0; overflow: hidden; border: 1px solid rgba(201, 210, 220, .12); background: #080b10; }
+    .graph-canvas { display: block; width: 100%; height: 360px; touch-action: none; cursor: grab; user-select: none; }
+    .graph-canvas.dragging { cursor: grabbing; }
+    .graph-expressions { display: grid; align-content: start; gap: 8px; max-height: 250px; overflow-y: auto; }
+    .graph-expression-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) 30px; gap: 6px; align-items: center; }
+    .graph-color { width: 28px; height: 30px; padding: 2px; border: 1px solid #344454; background: #080b10; cursor: pointer; }
+    .graph-expression { width: 100%; min-width: 0; padding: 7px 8px; border: 1px solid #344454; background: #080b10; color: var(--white); font: inherit; font-size: 12px; }
+    .graph-remove { width: 30px; height: 30px; border: 1px solid transparent; background: transparent; color: var(--muted); font-size: 17px; cursor: pointer; }
+    .graph-remove:hover { border-color: #344454; color: #ff8290; }
+    .graph-parameters { display: grid; gap: 7px; margin-top: 10px; }
+    .graph-parameter-row { display: grid; grid-template-columns: 18px minmax(0, 1fr) 74px; gap: 7px; align-items: center; color: var(--cyan); font-size: 12px; }
+    .graph-parameter-row input[type="range"] { width: 100%; accent-color: var(--blue); }
+    .graph-parameter-row input[type="number"] { width: 100%; min-width: 0; padding: 5px; border: 1px solid #344454; background: #080b10; color: var(--white); font: inherit; font-size: 11px; }
+    .graph-range-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+    .graph-range { display: grid; grid-template-columns: 18px minmax(0, 1fr); align-items: center; gap: 4px; color: var(--muted); font-size: 11px; }
+    .graph-range input { width: 100%; min-width: 0; padding: 6px; border: 1px solid #344454; background: #080b10; color: var(--white); font: inherit; font-size: 11px; }
+    .graph-controls { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+    .graph-control-button { min-height: 32px; padding: 6px 9px; border: 1px solid #344454; background: #151d27; color: var(--white); font: inherit; font-size: 11px; cursor: pointer; }
+    .graph-control-button:hover { border-color: var(--blue); }
+    .graph-add-expression { border-color: #248bb6; color: var(--cyan); }
+    .graph-status { min-height: 18px; margin: 10px 0 0; color: var(--muted); font-size: 11px; }
+    .graph-status[data-state="error"] { color: #ff8290; }
+    .graph-status[data-state="success"] { color: var(--lime); }
+    .graph-help { margin: 7px 0 0; color: #8794a3; font-size: 10px; line-height: 1.5; }
+    .graph-send { margin-top: 10px; border-color: var(--blue); background: var(--blue); color: #06121a; font-weight: 700; }
+    .graph-send:disabled { opacity: .45; cursor: default; }
+    .message.loading::before { display: inline-block; flex: 0 0 auto; margin-right: .55em; color: var(--cyan); content: "⚙"; font-size: 1.15em; line-height: 1; animation: gear-turn 1.4s linear infinite; }
+    .message.loading::after { display: inline-block; flex: 0 0 1.3em; width: 1.3em; content: "..."; overflow: hidden; }
+    .composer-area { width: min(690px, 100%); margin: auto auto 0; padding-top: 28px; }
+    .composer { display: grid; gap: 8px; min-height: 62px; padding: 11px 12px; border: 1px solid rgba(151, 165, 184, .22); border-radius: 25px; background: #1b1b1b; box-shadow: 0 8px 28px rgba(0,0,0,.2); transition: border-color .2s, box-shadow .2s, background .2s; }
+    .composer:focus-within { border-color: rgba(192, 198, 208, .48); background: #202020; box-shadow: 0 8px 30px rgba(0,0,0,.25); }
+    .composer-row { display: flex; align-items: flex-end; gap: 10px; min-width: 0; }
+    textarea { width: 100%; min-height: 38px; max-height: 150px; resize: none; overflow-y: auto; border: 0; outline: 0; background: transparent; color: var(--white); font-size: 14px; line-height: 1.5; }
+    textarea::placeholder { color: #a0a0a0; }
+    .composer-action { flex: 0 0 38px; width: 38px; height: 38px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; cursor: pointer; transition: background .18s, color .18s, transform .18s; }
+    .attach { background: transparent; color: #c5c5c5; }
+    .attach:hover, .attach:focus-visible { background: #303030; color: #fff; }
+    .attach svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .send { background: #f2f2f2; color: #101010; }
+    .send:hover { transform: scale(1.05); background: #fff; }
+    .send:disabled { opacity: .45; cursor: default; transform: none; }
+    .send svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .attachment-list { display: flex; flex-wrap: wrap; gap: 7px; }
+    .attachment-list[hidden] { display: none; }
+    .attachment-chip { max-width: 100%; display: inline-flex; align-items: center; gap: 7px; padding: 6px 8px 6px 10px; border: 1px solid rgba(151, 165, 184, .2); border-radius: 12px; background: #292929; color: #e4e4e4; font-size: 11px; }
+    .attachment-chip-name { max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .attachment-remove { width: 22px; height: 22px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #c5c5c5; font-size: 17px; line-height: 1; cursor: pointer; }
+    .attachment-remove:hover { background: #414141; color: #fff; }
+    .attachment-status { margin: 0; color: #ff9a9a; font-size: 11px; }
+    .attachment-status:empty { display: none; }
+    .disclaimer { margin: 10px 4px 0; color: #778595; font-size: 11px; text-align: center; }
+    .mobile-brand { display: none; }
+
+    @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes message-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes thinking { 0% { width: 0; } 100% { width: 1.3em; } }
+    @keyframes drift { to { transform: rotate(360deg); } }
+    @keyframes breathe { from { transform: scale(.88) rotate(-12deg); opacity: .62; } to { transform: scale(1.08) rotate(14deg); opacity: 1; } }
+    @keyframes pulse { 0%, 100% { transform: scale(.94); } 50% { transform: scale(1.05); } }
+    @keyframes gear-turn { to { rotate: 360deg; } }
+    @keyframes gear-turn-reverse { to { rotate: -540deg; } }
+    @keyframes gear-energy { from { opacity: .55; } to { opacity: 1; } }
+    @keyframes streak-gear-turn { to { rotate: 360deg; } }
+    @keyframes streak-flame-flicker { from { transform: rotate(-7deg) scale(.92); } to { transform: rotate(7deg) scale(1.08); } }
+    @keyframes progress-tip-glow { from { opacity: .7; } to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .streak-gear, .streak-flame, .user-avatar-gear, .chat-tour-spotlight { animation-duration: .01ms; animation-iteration-count: 1; transition-duration: .01ms; }
+      .chat-tour-card { animation-duration: .01ms; }
+    }
+    @media (max-width: 760px), (max-height: 700px) {
+      .auth-gate { place-items: start center; padding: 8px; }
+      .auth-card { height: calc(100dvh - 16px); max-height: none; grid-template-rows: auto minmax(0, 1fr); }
+      .auth-header { padding: 15px 16px 12px; }
+      .auth-form { overflow-y: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(300px, 1fr); }
+      .auth-fields { gap: 9px; padding: 16px; }
+      .auth-fields h1 { font-size: 20px; }
+      .auth-terms { min-height: 390px; padding: 14px 16px; border-top: 1px solid rgba(201,210,220,.1); border-left: 0; }
+    }
+    @media (min-width: 761px) and (max-height: 700px) {
+      .auth-form { grid-template-columns: minmax(230px, .75fr) minmax(0, 1.25fr); grid-template-rows: minmax(0, 1fr); }
+      .auth-terms { min-height: 0; border-top: 0; border-left: 1px solid rgba(201,210,220,.1); }
+      .auth-fields { overflow-y: auto; }
+      .auth-terms { grid-template-rows: auto minmax(100px, 1fr) auto; }
+      .auth-terms-note { margin: 0; }
+    }
+    @media (max-height: 420px) {
+      .auth-header { padding-block: 9px; }
+      .auth-tagline { display: none; }
+      .auth-fields { gap: 6px; padding-block: 8px; }
+      .auth-fields > p { line-height: 1.3; }
+      .auth-fields h1 { font-size: 18px; }
+      .auth-terms { gap: 6px; padding-block: 8px; }
+      .auth-terms h2 { font-size: 14px; }
+    }
+    @media (max-width: 760px) {
+      .app { height: 100svh; min-height: 100svh; }
+      .sidebar { flex-direction: column; gap: 22px; padding: 22px 16px; border-right: 1px solid var(--line); border-bottom: 0; }
+      .brand-row, .sidebar > section[aria-label="Conversaciones recientes"], .sidebar-note { display: flex; }
+      .sidebar > section[aria-label="Conversaciones recientes"] { flex-direction: column; }
+      .new-chat { flex: 0 0 auto; min-height: 40px; padding-inline: 10px; font-size: 12px; }
+      .workspace { min-height: 0; grid-template-rows: 58px minmax(0, 1fr); }
+      .topbar { padding-inline: 12px; }
+      .topbar-start { gap: 7px; }
+      .topbar-end { gap: 4px; }
+      .model-tag { font-size: 10px; }
+      .user-profile-button { width: 42px; height: 42px; flex-basis: 42px; }
+      .user-avatar-photo, .user-avatar-placeholder { width: 26px; height: 26px; }
+      .sidebar-toggle { width: 38px; height: 38px; flex: 0 0 38px; }
+      .assistant-name { font-size: 13px; }
+      .study-streak-button { min-height: 34px; gap: 4px; padding: 3px 6px; }
+      .learning-progress-button { min-width: 132px; gap: 4px; padding: 5px 6px; }
+      .learning-progress-track { height: 6px; }
+      .learning-progress-module { display: none; }
+      .learning-progress-panel { left: 45px; }
+      .streak-panel { left: 45px; }
+      .mobile-brand { display: none; }
+      .toolbox { right: 12px; bottom: 88px; }
+      .toolbox-toggle { width: 50px; height: 50px; }
+      .main-content { justify-content: flex-start; overflow-y: auto; padding: 24px 18px 18px; }
+      .welcome { margin-block: auto; }
+      .aura-wrap { width: 170px; margin-bottom: 18px; }
+      .suggestions { grid-template-columns: 1fr; gap: 8px; margin-top: 25px; }
+      .suggestion { min-height: 52px; }
+      .geometry-tool { padding: 12px; }
+      .graph-tool { padding: 12px; }
+      .graph-layout { grid-template-columns: minmax(0, 1fr); }
+      .graph-canvas { height: min(62vw, 330px); min-height: 230px; }
+      .graph-expressions { grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 170px; }
+      .composer-area { padding-top: 20px; }
+      .conversation { margin-top: 12px; }
+      .chat-tour-card { padding: 14px; }
+    }
+    @media (max-width: 390px) {
+      .model-tag { font-size: 11px; }
+      .topbar-end { gap: 2px; }
+      .model-tag { display: none; }
+      .assistant-name { display: none; }
+      .auth-fields { padding: 13px; }
+      .auth-terms { padding-inline: 13px; }
+      .aura-wrap { width: 150px; }
+      .gear-cluster { transform: translate(-50%, -50%) scale(.7); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="auth-gate" id="auth-gate" aria-labelledby="auth-title">
+    <section class="auth-card">
+      <header class="auth-header">
+        <p class="auth-brand">Brain<span>Mach</span></p>
+        <p class="auth-tagline">Tu espacio de aprendizaje con inteligencia artificial.</p>
+      </header>
+      <form class="auth-form" id="auth-form">
+        <section class="auth-fields" aria-label="Datos de la cuenta">
+          <h1 id="auth-title">Crea tu cuenta simulada</h1>
+          <p id="auth-description">Escribe tu nombre para crear una cuenta de prueba. Se recordará en este navegador hasta que cierres sesión. Cuatro infracciones a las normas ocasionan un bloqueo permanente.</p>
+          <label class="auth-field">
+            Tu nombre
+            <input id="auth-display-name" name="displayName" type="text" autocomplete="name" maxlength="60" placeholder="¿Cómo te llamas?" required>
+          </label>
+          <p class="auth-status" id="auth-status" role="status" aria-live="polite"></p>
+        </section>
+        <section class="auth-terms" aria-labelledby="auth-terms-title">
+          <h2 id="auth-terms-title">Términos y Condiciones y Política de Privacidad</h2>
+          <div class="auth-terms-scroll" id="auth-terms-scroll" tabindex="0" aria-label="Reglamento de uso de BrainMach">
+            <p>Al acceder, registrarse o utilizar BrainMach, el usuario declara haber leído, comprendido y aceptado los presentes Términos y Condiciones de Uso, reconociendo que BrainMach es una plataforma de inteligencia artificial diseñada para brindar apoyo educativo, académico, profesional y creativo mediante la generación automatizada de contenido, respuestas y recomendaciones que pueden contener errores, omisiones o imprecisiones, por lo que el usuario asume la responsabilidad de verificar cualquier información antes de utilizarla en contextos académicos, laborales, legales, médicos, financieros o de cualquier otra naturaleza; asimismo, se compromete a utilizar la plataforma de manera ética, legal y responsable, absteniéndose de emplearla para actividades ilícitas, fraudulentas, ofensivas, discriminatorias, violentas, engañosas o que vulneren los derechos de terceros, incluyendo, entre otras, el robo de identidad, la suplantación de personas, la distribución de software malicioso, el acceso no autorizado a sistemas, la falsificación de documentos, el plagio académico o la generación de contenido destinado a causar daño; el usuario reconoce que BrainMach no sustituye el criterio humano ni el asesoramiento profesional especializado y que la responsabilidad final sobre las decisiones tomadas con base en la información proporcionada por la plataforma recae exclusivamente en quien la utiliza; adicionalmente, acepta que la plataforma pueda recopilar y procesar información relacionada con las consultas realizadas, datos técnicos de uso e historial de interacciones con el fin de mejorar el servicio, garantizar la seguridad del sistema y desarrollar nuevas funcionalidades, recomendándose no compartir datos personales sensibles, contraseñas, información financiera, médica o confidencial; igualmente, el usuario reconoce que los desarrolladores y administradores de BrainMach podrán actualizar, modificar, suspender o restringir parcial o totalmente el acceso a la plataforma, así como bloquear cuentas o contenidos que incumplan estas disposiciones, sin que ello genere responsabilidad alguna por posibles interrupciones, pérdidas de información o consecuencias derivadas del uso del servicio; finalmente, al seleccionar la opción “Acepto los Términos y Condiciones y la Política de Privacidad”, el usuario manifiesta su conformidad expresa con todas las disposiciones anteriores y se compromete a utilizar BrainMach como una herramienta de apoyo al aprendizaje, la productividad y el desarrollo del conocimiento, manteniendo en todo momento una conducta respetuosa, honesta y acorde con los principios de uso responsable de la inteligencia artificial.</p>
+          </div>
+          <label class="auth-consent">
+            <input id="auth-accept-terms" name="acceptTerms" type="checkbox" required disabled>
+            <span>He leído y acepto los Términos y Condiciones y la Política de Privacidad.</span>
+          </label>
+          <p class="auth-terms-note" id="auth-terms-note">Desplázate hasta el final del reglamento para habilitar la aceptación.</p>
+          <button class="auth-submit" id="auth-submit" type="submit" disabled>Crear cuenta simulada y entrar</button>
+        </section>
+      </form>
+    </section>
+  </main>
+  <section class="account-ban" id="account-ban" aria-labelledby="account-ban-title" aria-live="assertive" hidden>
+    <div class="account-ban-card">
+      <h1 id="account-ban-title">Cuenta bloqueada permanentemente</h1>
+      <p id="account-ban-message">Esta cuenta y el navegador asociado fueron bloqueados tras cuatro advertencias por incumplir las normas de uso.</p>
+    </div>
+  </section>
+  <video class="wallpaper-video" id="wallpaper-video" loop muted playsinline preload="none" aria-hidden="true" tabindex="-1" hidden>
+    <source src="synthwave-city-moewalls-com.mp4" type="video/mp4">
+  </video>
+  <div class="app" hidden>
+    <aside class="sidebar" id="module-sidebar" aria-label="Panel de módulos">
+      <div class="brand-row">
+        <a class="wordmark" href="/">Brain<span>Mach</span></a>
+        <a class="back-link" href="/">Volver</a>
+      </div>
+      <button class="new-chat" id="new-chat" type="button"><span class="plus" aria-hidden="true">+</span> Nuevo chat</button>
+      <section class="module-panel" aria-label="Materias y problemas">
+        <p class="history-label">Materias</p>
+        <div class="module-list" id="module-list" aria-label="Materias"></div>
+        <form class="module-form" id="module-form">
+          <label class="sr-only" for="module-name">Nombre de la nueva materia</label>
+          <input class="module-input" id="module-name" type="text" maxlength="50" placeholder="Nueva materia" required>
+          <button class="module-add" type="submit" aria-label="Agregar materia" title="Agregar materia">+</button>
+        </form>
+        <p class="module-status" id="module-status" aria-live="polite">Seleccioná un problema para cargarlo en el chat.</p>
+      </section>
+      <section aria-label="Conversaciones recientes">
+        <p class="history-label">Recientes</p>
+        <div class="conversation-history" id="conversation-history"></div>
+        <p class="conversation-history-status" id="conversation-history-status" role="status" aria-live="polite"></p>
+      </section>
+      <div class="sidebar-note">Asistente BrainMach<br>Prototipo de interfaz</div>
+    </aside>
+    <button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Cerrar menú de módulos" tabindex="-1"></button>
+    <nav class="toolbox" aria-label="Herramientas matemáticas">
+      <div class="toolbox-panel" id="toolbox-panel" aria-label="Herramientas matemáticas" hidden>
+        <p class="toolbox-title">Herramientas</p>
+        <button class="graph-shortcut" id="open-pythagoras" type="button" aria-label="Abrir triángulo de Pitágoras" title="Teorema de Pitágoras">
+          <span class="graph-shortcut-orb" aria-hidden="true">
+            <span class="graph-shortcut-core">
+              <svg viewBox="0 0 24 24"><path d="M5 19V5l14 14H5Z"></path><path d="M5 15h4v4"></path></svg>
+            </span>
+          </span>
+          <span class="graph-shortcut-label">Pitágoras</span>
+        </button>
+        <button class="graph-shortcut" id="open-calculus-graph" type="button" aria-label="Abrir gráfica de Cálculo Diferencial" title="Cálculo Diferencial">
+          <span class="graph-shortcut-orb" aria-hidden="true">
+            <span class="graph-shortcut-core graph-shortcut-symbol">ƒx</span>
+          </span>
+          <span class="graph-shortcut-label">Cálculo</span>
+        </button>
+      </div>
+      <button class="toolbox-toggle" id="toolbox-toggle" type="button" aria-label="Abrir herramientas" aria-expanded="false" aria-controls="toolbox-panel" title="Herramientas">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"></path><path d="m19.4 15 .1.1a1.8 1.8 0 0 1-2.5 2.5l-.1-.1a1.8 1.8 0 0 0-3 .9v.2a1.8 1.8 0 0 1-3.6 0v-.2a1.8 1.8 0 0 0-3-.9l-.1.1a1.8 1.8 0 1 1-2.5-2.5l.1-.1a1.8 1.8 0 0 0-.9-3H3.7a1.8 1.8 0 0 1 0-3.6h.2a1.8 1.8 0 0 0 .9-3l-.1-.1a1.8 1.8 0 1 1 2.5-2.5l.1.1a1.8 1.8 0 0 0 3-.9v-.2a1.8 1.8 0 0 1 3.6 0v.2a1.8 1.8 0 0 0 3 .9l.1-.1a1.8 1.8 0 1 1 2.5 2.5l-.1.1a1.8 1.8 0 0 0 .9 3h.2a1.8 1.8 0 0 1 0 3.6h-.2a1.8 1.8 0 0 0-.9 3Z"></path></svg>
+      </button>
+    </nav>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-start">
+          <button class="sidebar-toggle" id="sidebar-toggle" type="button" aria-label="Abrir menú de módulos" aria-expanded="false" aria-controls="module-sidebar">
+            <span class="menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+          </button>
+          <div class="assistant-name">BrainMach</div>
+          <button class="study-streak-button" id="study-streak-button" type="button" aria-label="Abrir racha de estudio" aria-expanded="false" aria-controls="study-streak-panel" title="Racha de estudio">
+            <span class="streak-icon" aria-hidden="true">
+              <svg class="streak-gear" viewBox="0 0 48 48"><path d="M20.5 2h7l1.4 5.3 4 1.7 4.8-2.6 4.9 4.9-2.6 4.8 1.7 4 5.3 1.4v7l-5.3 1.4-1.7 4 2.6 4.8-4.9 4.9-4.8-2.6-4 1.7L27.5 45h-7l-1.4-5.3-4-1.7-4.8 2.6-4.9-4.9L8 30.9l-1.7-4L1 25.5v-7l5.3-1.4 1.7-4-2.6-4.8 4.9-4.9 4.8 2.6 4-1.7L20.5 2Z"></path><circle cx="24" cy="22" r="7" fill="#111821"></circle></svg>
+              <svg class="streak-flame" viewBox="0 0 20 24"><path d="M11.5 1C12.2 6.1 7 7 8.3 11.1c.7-1.5 2-2.5 3.2-3.1 3.8 3.7 5.3 6.5 4.1 10.1A7.3 7.3 0 0 1 1.5 16c0-3.5 2.1-6.3 5.2-8.8-.2 3.3 1.1 4.2 1.8 4.7C7 7.3 12.5 5.8 11.5 1Z"></path></svg>
+            </span>
+            <span class="streak-count" id="streak-count">0</span>
+          </button>
+          <section class="streak-panel" id="study-streak-panel" aria-label="Progreso de racha de estudio" role="dialog" hidden>
+            <h2>Racha de estudio</h2>
+            <div class="streak-total"><strong id="streak-current">0</strong><span>días consecutivos</span></div>
+            <div class="streak-week" id="streak-week" aria-label="Actividad de los últimos siete días"></div>
+            <p class="streak-record">Récord personal: <strong id="streak-best">0</strong> días</p>
+            <p class="streak-guidance" id="streak-guidance" role="status">Envía un problema de una materia al asistente cada día para mantener tu racha.</p>
+          </section>
+          <button class="learning-progress-button" id="learning-progress-button" type="button" aria-label="Ver nivel de aprendizaje por materia" aria-expanded="false" aria-controls="learning-progress-panel" title="Progreso de aprendizaje por materia">
+            <span class="learning-progress-summary"><span id="learning-progress-level">Nivel 1</span><span class="learning-progress-module" id="learning-progress-module">Matemática</span></span>
+            <span class="learning-progress-track" role="progressbar" id="learning-progress-bar" aria-label="Progreso al siguiente nivel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="learning-progress-fill" id="learning-progress-fill"></span></span>
+          </button>
+          <section class="learning-progress-panel" id="learning-progress-panel" aria-label="Niveles de aprendizaje" role="dialog" hidden>
+            <h2>Nivel de aprendizaje</h2>
+            <p class="learning-progress-help">Completa ejercicios de una materia para ganar 20 puntos. Cada 100 puntos subes un nivel; al llegar a los niveles 10, 20, 30... se activa un test.</p>
+            <div class="learning-module-list" id="learning-module-list"></div>
+            <section class="wallpaper-controls" aria-label="Personalización del fondo">
+              <p class="wallpaper-status" id="wallpaper-status" role="status" aria-live="polite"></p>
+              <div class="wallpaper-actions">
+                <button id="wallpaper-upload-button" type="button" disabled>Bloqueado · nivel 5</button>
+                <button id="wallpaper-reset-button" type="button" hidden>Restablecer fondo</button>
+                <input class="sr-only" id="wallpaper-input" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Elegir una imagen para el fondo">
+              </div>
+            </section>
+          </section>
+        </div>
+        <div class="topbar-end">
+          <div class="model-tag"><span class="online" aria-hidden="true"></span>Asistente</div>
+          <button class="user-profile-button" id="user-profile-button" type="button" aria-label="Abrir perfil de usuario" aria-expanded="false" aria-controls="user-profile-menu" title="Perfil de usuario">
+            <svg class="user-avatar-gear" viewBox="0 0 100 100" aria-hidden="true">
+              <path d="M42 4h16l2.2 8.2a38 38 0 0 1 7 2.9l7.2-4.1 11.3 11.3-4.1 7.2a38 38 0 0 1 2.9 7L92 39v16l-8.2 2.2a38 38 0 0 1-2.9 7l4.1 7.2-11.3 11.3-7.2-4.1a38 38 0 0 1-7 2.9L58 90H42l-2.2-8.2a38 38 0 0 1-7-2.9l-7.2 4.1-11.3-11.3 4.1-7.2a38 38 0 0 1-2.9-7L8 55V39l8.2-2.2a38 38 0 0 1 2.9-7L15 22.6l11.3-11.3 7.2 4.1a38 38 0 0 1 7-2.9L42 4Z"></path>
+              <circle cx="50" cy="47" r="29"></circle>
+            </svg>
+            <img class="user-avatar-photo" id="user-avatar-photo" alt="" hidden>
+            <span class="user-avatar-placeholder" id="user-avatar-placeholder" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20c.5-4 3.2-6 7.5-6s7 2 7.5 6"></path></svg>
+            </span>
+          </button>
+          <section class="user-profile-menu" id="user-profile-menu" aria-label="Perfil de usuario" hidden>
+            <p class="user-profile-name"><span id="user-profile-display-name"></span><span class="user-profile-username" id="user-profile-username"></span></p>
+            <button id="user-avatar-change" type="button">Cambiar foto</button>
+            <button id="user-avatar-remove" type="button" hidden>Quitar foto</button>
+            <input class="sr-only" id="user-avatar-input" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Elegir foto de perfil">
+            <p class="user-profile-status" id="user-profile-status" role="status" aria-live="polite"></p>
+            <button class="user-logout" id="user-logout" type="button">Cerrar sesión</button>
+          </section>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <section class="welcome" id="welcome">
+          <div class="aura-wrap" aria-hidden="true">
+            <div class="gear-cluster">
+              <div class="gear gear-main"><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i></div>
+              <div class="gear gear-secondary gear-left"><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i></div>
+              <div class="gear gear-secondary gear-upper-right"><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i></div>
+              <div class="gear gear-secondary gear-lower-right"><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i><i class="gear-tooth"></i></div>
+            </div>
+          </div>
+          <h1>¿En qué puedo ayudarte?</h1>
+          <p class="subtitle">Pensá en voz alta. Podemos ordenar una idea, explorar un problema o empezar desde cero.</p>
+          <button class="tour-start-button" id="start-chat-tour" type="button">¿Cómo la uso?</button>
+          <div class="suggestions" aria-label="Ideas para empezar">
+          </div>
+        </section>
+
+        <section class="conversation" id="conversation" aria-live="polite" aria-label="Conversación"></section>
+
+        <div class="composer-area">
+          <form class="composer" id="chat-form">
+            <div class="attachment-list" id="attachment-list" aria-label="Archivos para analizar" hidden></div>
+            <p class="attachment-status" id="attachment-status" role="status" aria-live="polite"></p>
+            <div class="composer-row">
+              <button class="composer-action attach" id="attach-files" type="button" aria-label="Adjuntar archivos" title="Adjuntar PDF, imagen o archivo de texto">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 5-6.7 6.7a4 4 0 0 0 5.7 5.7l7.4-7.4a2.7 2.7 0 0 0-3.8-3.8l-7.4 7.4a1.3 1.3 0 0 0 1.9 1.9l6.3-6.3"/></svg>
+              </button>
+              <input class="sr-only" id="attachment-input" type="file" accept=".pdf,.txt,.md,.csv,.png,.jpg,.jpeg,.webp,application/pdf,text/plain,text/markdown,text/csv,image/png,image/jpeg,image/webp" multiple>
+              <textarea id="prompt" rows="1" aria-label="Escribí tu mensaje" placeholder="Pregunta lo que quieras" aria-describedby="composer-hint"></textarea>
+              <button class="composer-action send" type="submit" aria-label="Enviar mensaje" title="Enviar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg>
+              </button>
+            </div>
+          </form>
+          <p class="disclaimer" id="composer-hint">Puedes adjuntar PDF, imágenes o archivos de texto · Enter para enviar · Shift+Enter para nueva línea. El audio se genera con IA.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="chat-tour" id="chat-tour" hidden>
+    <div class="chat-tour-backdrop" aria-hidden="true"></div>
+    <div class="chat-tour-spotlight" id="chat-tour-spotlight" aria-hidden="true"></div>
+    <section class="chat-tour-card" id="chat-tour-card" role="dialog" aria-modal="true" aria-labelledby="chat-tour-title" aria-describedby="chat-tour-description">
+      <p class="chat-tour-kicker">Recorrido de BrainMach</p>
+      <h2 id="chat-tour-title"></h2>
+      <p class="chat-tour-description" id="chat-tour-description"></p>
+      <div class="chat-tour-footer">
+        <span class="chat-tour-count" id="chat-tour-count"></span>
+        <div class="chat-tour-actions">
+          <button id="chat-tour-exit" type="button">Salir</button>
+          <button id="chat-tour-back" type="button">Anterior</button>
+          <button class="chat-tour-next" id="chat-tour-next" type="button">Siguiente</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    const authGate = document.querySelector("#auth-gate");
+    const authForm = document.querySelector("#auth-form");
+    const authDisplayNameInput = document.querySelector("#auth-display-name");
+    const authAcceptTerms = document.querySelector("#auth-accept-terms");
+    const authTermsScroll = document.querySelector("#auth-terms-scroll");
+    const authTermsNote = document.querySelector("#auth-terms-note");
+    const authSubmitButton = document.querySelector("#auth-submit");
+    const authStatus = document.querySelector("#auth-status");
+    const app = document.querySelector(".app");
+    const accountBanScreen = document.querySelector("#account-ban");
+    const accountBanMessage = document.querySelector("#account-ban-message");
+    const profileButton = document.querySelector("#user-profile-button");
+    const profileMenu = document.querySelector("#user-profile-menu");
+    const profileDisplayName = document.querySelector("#user-profile-display-name");
+    const profileUsername = document.querySelector("#user-profile-username");
+    const profileStatus = document.querySelector("#user-profile-status");
+    const avatarPhoto = document.querySelector("#user-avatar-photo");
+    const avatarPlaceholder = document.querySelector("#user-avatar-placeholder");
+    const avatarChangeButton = document.querySelector("#user-avatar-change");
+    const avatarRemoveButton = document.querySelector("#user-avatar-remove");
+    const avatarInput = document.querySelector("#user-avatar-input");
+    const logoutButton = document.querySelector("#user-logout");
+    let authUser = null;
+    let resolveAuthReady;
+    const authReady = new Promise((resolve) => { resolveAuthReady = resolve; });
+    let termsWereRead = false;
+    let hasUserAvatar = false;
+
+    function showPermanentBan(message) {
+      authGate.hidden = true;
+      app.hidden = true;
+      accountBanMessage.textContent = message ||
+        "Esta cuenta y el navegador asociado fueron bloqueados tras cuatro advertencias por incumplir las normas de uso.";
+      accountBanScreen.hidden = false;
+    }
+
+    function updateAuthSubmitAvailability() {
+      authSubmitButton.disabled = !termsWereRead ||
+        !authAcceptTerms.checked ||
+        !authDisplayNameInput.value.trim() ||
+        authSubmitButton.dataset.busy === "true";
+    }
+
+    authTermsScroll.addEventListener("scroll", () => {
+      if (authTermsScroll.scrollTop + authTermsScroll.clientHeight >= authTermsScroll.scrollHeight - 8) {
+        termsWereRead = true;
+        authAcceptTerms.disabled = false;
+        authTermsNote.textContent = "Al continuar, la aceptación quedará registrada en esta cuenta simulada.";
+      }
+      updateAuthSubmitAvailability();
+    });
+    authAcceptTerms.addEventListener("change", updateAuthSubmitAvailability);
+    authDisplayNameInput.addEventListener("input", updateAuthSubmitAvailability);
+
+    authForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      authStatus.textContent = "";
+      authSubmitButton.dataset.busy = "true";
+      updateAuthSubmitAvailability();
+      try {
+        const response = await fetch("/api/auth/demo", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            displayName: authDisplayNameInput.value.trim(),
+            acceptTerms: authAcceptTerms.checked,
+          }),
+        });
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.toLowerCase().includes("application/json")) {
+          throw new Error("No se encontró el servidor de BrainMach. Ejecuta `npm start` y abre http://localhost:3000/asistente.html.");
+        }
+        const data = await response.json();
+        if (data.permanentlyBanned) {
+          showPermanentBan(data.error);
+          return;
+        }
+        if (!response.ok) throw new Error(data.error || "No se pudo crear la cuenta simulada.");
+        authUser = data.user;
+        authGate.hidden = true;
+        app.hidden = false;
+        resolveAuthReady();
+      } catch (error) {
+        authStatus.textContent = error.message || "No se pudo conectar con BrainMach. Comprueba que el servidor esté activo.";
+      } finally {
+        delete authSubmitButton.dataset.busy;
+        updateAuthSubmitAvailability();
+      }
+    });
+
+    try {
+      const response = await fetch("/api/auth/session", { credentials: "same-origin" });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user) {
+          authUser = data.user;
+          authGate.hidden = true;
+          app.hidden = false;
+          resolveAuthReady();
+        }
+      } else {
+        const data = await response.json().catch(() => ({}));
+        if (data.permanentlyBanned) {
+          showPermanentBan(data.error);
+        } else {
+          authStatus.textContent = data.error || "No se pudo comprobar la cuenta simulada. Inténtalo otra vez.";
+        }
+      }
+    } catch (error) {
+      authStatus.textContent = "No se pudo conectar con BrainMach. Inicia el servidor de la aplicación e inténtalo otra vez.";
+    }
+
+    if (!authUser) await authReady;
+
+    function scopedStorageKey(key) {
+      return `brainmach:user:${authUser.id}:${key}`;
+    }
+
+    function migrateLegacyStorage() {
+      const ownerKey = "brainmach:legacy-storage-owner";
+      try {
+        if (localStorage.getItem(ownerKey)) return;
+        localStorage.setItem(ownerKey, String(authUser.id));
+        const storageKeys = [
+          ["brainmach-conversations", "conversations"],
+          ["brainmach-modules", "modules"],
+          ["brainmach-learning-progress", "learning-progress"],
+          ["brainmach-study-streak", "study-streak"],
+          ["brainmach-assistant-wallpaper", "assistant-wallpaper"],
+          ["brainmach-assistant-wallpaper-unlocked", "assistant-wallpaper-unlocked"],
+        ];
+        storageKeys.forEach(([legacyKey, scopedKey]) => {
+          const value = localStorage.getItem(legacyKey);
+          if (value === null) return;
+          const destinationKey = scopedStorageKey(scopedKey);
+          if (localStorage.getItem(destinationKey) === null) {
+            localStorage.setItem(destinationKey, value);
+          }
+          localStorage.removeItem(legacyKey);
+        });
+      } catch (error) {
+        console.error("No se pudieron migrar los datos guardados previamente:", error);
+        profileStatus.dataset.state = "error";
+        profileStatus.textContent = "No se pudieron migrar todos tus datos anteriores del navegador.";
+      }
+    }
+
+    migrateLegacyStorage();
+
+    function renderUserProfile() {
+      profileDisplayName.textContent = authUser.displayName;
+      profileUsername.textContent = "Cuenta simulada";
+      profileButton.setAttribute("aria-label", `Perfil de ${authUser.displayName}`);
+      profileButton.title = `Perfil de ${authUser.displayName}`;
+      if (hasUserAvatar) {
+        avatarPhoto.src = "/api/auth/avatar";
+        avatarPhoto.hidden = false;
+        avatarPlaceholder.hidden = true;
+      } else {
+        avatarPhoto.removeAttribute("src");
+        avatarPhoto.hidden = true;
+        avatarPlaceholder.hidden = false;
+      }
+      avatarRemoveButton.hidden = !hasUserAvatar;
+    }
+
+    profileButton.addEventListener("click", () => {
+      const opening = profileMenu.hidden;
+      profileMenu.hidden = !opening;
+      profileButton.setAttribute("aria-expanded", String(opening));
+    });
+    document.addEventListener("click", (event) => {
+      if (!profileMenu.hidden && !profileMenu.contains(event.target) && !profileButton.contains(event.target)) {
+        profileMenu.hidden = true;
+        profileButton.setAttribute("aria-expanded", "false");
+      }
+    });
+    avatarChangeButton.addEventListener("click", () => avatarInput.click());
+    avatarInput.addEventListener("change", async () => {
+      const file = avatarInput.files[0];
+      avatarInput.value = "";
+      if (!file) return;
+      if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size === 0 || file.size > 5 * 1024 * 1024) {
+        profileStatus.dataset.state = "error";
+        profileStatus.textContent = "Elige una imagen PNG, JPG o WebP de hasta 5 MB.";
+        return;
+      }
+
+      const imageUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = async () => {
+        try {
+          if (!image.naturalWidth || !image.naturalHeight) throw new Error("La imagen no tiene dimensiones válidas.");
+          const scale = Math.min(1, 512 / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("No se pudo procesar la foto.");
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          const response = await fetch("/api/auth/avatar", {
+            method: "PUT",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ avatar: canvas.toDataURL("image/jpeg", 0.84) }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "No se pudo guardar la foto.");
+          hasUserAvatar = true;
+          renderUserProfile();
+          profileStatus.dataset.state = "success";
+          profileStatus.textContent = "Foto guardada. La imagen permanece fija dentro del engranaje animado.";
+        } catch (error) {
+          console.error("No se pudo guardar la foto de perfil:", error);
+          profileStatus.dataset.state = "error";
+          profileStatus.textContent = error.message || "No se pudo guardar la foto de perfil.";
+        } finally {
+          URL.revokeObjectURL(imageUrl);
+        }
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(imageUrl);
+        profileStatus.dataset.state = "error";
+        profileStatus.textContent = "No se pudo leer la imagen. Prueba con otro archivo.";
+      };
+      image.src = imageUrl;
+    });
+    avatarRemoveButton.addEventListener("click", async () => {
+      try {
+        const response = await fetch("/api/auth/avatar", { method: "DELETE", credentials: "same-origin" });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || "No se pudo quitar la foto.");
+        }
+        hasUserAvatar = false;
+        renderUserProfile();
+        profileStatus.dataset.state = "success";
+        profileStatus.textContent = "Se quitó la foto de perfil.";
+      } catch (error) {
+        profileStatus.dataset.state = "error";
+        profileStatus.textContent = error.message || "No se pudo quitar la foto.";
+      }
+    });
+    logoutButton.addEventListener("click", async () => {
+      logoutButton.disabled = true;
+      try {
+        const response = await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+        if (!response.ok) throw new Error("No se pudo cerrar la sesión. Inténtalo otra vez.");
+        window.location.reload();
+      } catch (error) {
+        logoutButton.disabled = false;
+        profileStatus.dataset.state = "error";
+        profileStatus.textContent = error.message;
+      }
+    });
+
+    try {
+      const avatarResponse = await fetch("/api/auth/avatar", { credentials: "same-origin" });
+      hasUserAvatar = avatarResponse.ok && avatarResponse.status !== 204;
+      if (!avatarResponse.ok && avatarResponse.status !== 204) {
+        throw new Error("No se pudo cargar la foto de perfil.");
+      }
+    } catch (error) {
+      profileStatus.dataset.state = "error";
+      profileStatus.textContent = error.message || "No se pudo cargar la foto de perfil.";
+    }
+    renderUserProfile();
+
+    const form = document.querySelector("#chat-form");
+    const promptInput = document.querySelector("#prompt");
+    const attachmentInput = document.querySelector("#attachment-input");
+    const attachmentList = document.querySelector("#attachment-list");
+    const attachmentStatus = document.querySelector("#attachment-status");
+    const attachFilesButton = document.querySelector("#attach-files");
+    const welcome = document.querySelector("#welcome");
+    const conversation = document.querySelector("#conversation");
+    const sidebarToggle = document.querySelector("#sidebar-toggle");
+    const sidebarBackdrop = document.querySelector("#sidebar-backdrop");
+    const toolboxToggle = document.querySelector("#toolbox-toggle");
+    const toolboxPanel = document.querySelector("#toolbox-panel");
+    const moduleList = document.querySelector("#module-list");
+    const moduleStatus = document.querySelector("#module-status");
+    const conversationHistory = document.querySelector("#conversation-history");
+    const conversationHistoryStatus = document.querySelector("#conversation-history-status");
+    const learningProgressButton = document.querySelector("#learning-progress-button");
+    const learningProgressPanel = document.querySelector("#learning-progress-panel");
+    const learningModuleList = document.querySelector("#learning-module-list");
+    const learningProgressLevel = document.querySelector("#learning-progress-level");
+    const learningProgressModule = document.querySelector("#learning-progress-module");
+    const learningProgressBar = document.querySelector("#learning-progress-bar");
+    const learningProgressFill = document.querySelector("#learning-progress-fill");
+    const wallpaperStatus = document.querySelector("#wallpaper-status");
+    const wallpaperUploadButton = document.querySelector("#wallpaper-upload-button");
+    const wallpaperResetButton = document.querySelector("#wallpaper-reset-button");
+    const wallpaperInput = document.querySelector("#wallpaper-input");
+    const wallpaperVideo = document.querySelector("#wallpaper-video");
+    const chatTour = document.querySelector("#chat-tour");
+    const chatTourSpotlight = document.querySelector("#chat-tour-spotlight");
+    const chatTourCard = document.querySelector("#chat-tour-card");
+    const chatTourTitle = document.querySelector("#chat-tour-title");
+    const chatTourDescription = document.querySelector("#chat-tour-description");
+    const chatTourCount = document.querySelector("#chat-tour-count");
+    const chatTourBack = document.querySelector("#chat-tour-back");
+    const chatTourNext = document.querySelector("#chat-tour-next");
+    const chatTourExit = document.querySelector("#chat-tour-exit");
+    const messages = [];
+    let currentSpeechAudio = null;
+    let currentSpeechUrl = "";
+    let currentSpeechButton = null;
+    let currentSpeechController = null;
+    let selectedAttachments = [];
+    const conversationsStorageKey = scopedStorageKey("conversations");
+    let conversationHistoryError = "";
+    let conversations = loadConversations();
+    let activeConversationId = null;
+    const chatTourSteps = [
+      {
+        selector: "#sidebar-toggle",
+        title: "Tu espacio de estudio",
+        description: "Este botón abre el menú con tus materias, problemas y conversaciones. Durante el recorrido iremos señalando cada sección.",
+      },
+      {
+        selector: "#new-chat",
+        title: "Empieza una conversación",
+        description: "Usa «Nuevo chat» para comenzar otro tema sin mezclarlo con la conversación actual.",
+      },
+      {
+        selector: "#module-list",
+        title: "Materias y ejercicios",
+        description: "Aquí organizas tus materias. Al abrir una, encontrarás problemas para practicar o podrás crear uno propio.",
+      },
+      {
+        selector: "#conversation-history",
+        title: "Tus conversaciones",
+        description: "Los chats que empiezas quedan en «Recientes». Desde aquí puedes volver a abrirlos.",
+      },
+      {
+        selector: "#study-streak-button",
+        title: "Racha de estudio",
+        description: "La racha registra los días en los que practicas. Pulsa el icono para consultar tu actividad.",
+      },
+      {
+        selector: "#learning-progress-button",
+        title: "Nivel por materia",
+        description: "Esta barra muestra tu avance en la materia seleccionada. Al pulsarla verás el detalle y los próximos tests.",
+      },
+      {
+        selector: "#toolbox-toggle",
+        title: "Herramientas de aprendizaje",
+        description: "Abre este botón para encontrar herramientas como Pitágoras y gráficas de Cálculo.",
+      },
+      {
+        selector: "#toolbox-panel",
+        title: "Elige una herramienta",
+        description: "Desde este menú puedes abrir una herramienta matemática. Los resultados también se pueden consultar con el asistente.",
+      },
+      {
+        selector: "#attach-files",
+        title: "Adjunta tu material",
+        description: "El clip permite cargar un PDF, una imagen o un archivo de texto para pedirle al asistente que lo analice.",
+      },
+      {
+        selector: "#prompt",
+        title: "Escribe lo que necesitas",
+        description: "Cuéntale qué quieres aprender o pega un problema. Para resolverlo juntos, pídele que te guíe sin darte la respuesta.",
+      },
+      {
+        selector: ".composer .send",
+        title: "Envía tu mensaje",
+        description: "Pulsa la flecha para enviar. También puedes usar Enter; con Shift+Enter escribes otra línea.",
+      },
+    ];
+    let activeTourStep = -1;
+    let tourReturnFocus = null;
+
+    async function readApiResponse(response) {
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const body = await response.text();
+        if (body.trimStart().startsWith("<")) {
+          throw new Error("El servidor devolvió HTML en vez de JSON. Abre http://localhost:3000/asistente.html para conectar con el backend de BrainMach.");
+        }
+        throw new Error(`El backend devolvió una respuesta no JSON (HTTP ${response.status}).`);
+      }
+      const data = await response.json();
+      if (!response.ok) {
+        const error = new Error(data.error || "Error del servidor.");
+        error.moderationWarning = data.moderationWarning === true;
+        error.permanentlyBanned = data.permanentlyBanned === true;
+        throw error;
+      }
+      return data;
+    }
+
+    const attachmentTypes = {
+      pdf: { mime: "application/pdf", kind: "document" },
+      txt: { mime: "text/plain", kind: "text" },
+      md: { mime: "text/markdown", kind: "text" },
+      csv: { mime: "text/csv", kind: "text" },
+      png: { mime: "image/png", kind: "image" },
+      jpg: { mime: "image/jpeg", kind: "image" },
+      jpeg: { mime: "image/jpeg", kind: "image" },
+      webp: { mime: "image/webp", kind: "image" },
+    };
+    const maxAttachmentCount = 3;
+    const maxAttachmentSize = 5 * 1024 * 1024;
+    const maxCombinedAttachmentSize = 8 * 1024 * 1024;
+
+    function renderSelectedAttachments() {
+      attachmentList.replaceChildren();
+      attachmentList.hidden = selectedAttachments.length === 0;
+      selectedAttachments.forEach((file, index) => {
+        const chip = document.createElement("span");
+        chip.className = "attachment-chip";
+        const name = document.createElement("span");
+        name.className = "attachment-chip-name";
+        name.textContent = file.name;
+        const remove = document.createElement("button");
+        remove.className = "attachment-remove";
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.setAttribute("aria-label", `Quitar ${file.name}`);
+        remove.addEventListener("click", () => {
+          selectedAttachments.splice(index, 1);
+          renderSelectedAttachments();
+        });
+        chip.append(name, remove);
+        attachmentList.append(chip);
+      });
+    }
+
+    function addSelectedFiles(fileList) {
+      attachmentStatus.textContent = "";
+      const incomingFiles = Array.from(fileList);
+      const rejected = [];
+      for (const file of incomingFiles) {
+        const extension = file.name.split(".").pop().toLowerCase();
+        if (!attachmentTypes[extension]) {
+          rejected.push(`${file.name}: formato no compatible`);
+          continue;
+        }
+        if (file.size === 0 || file.size > maxAttachmentSize) {
+          rejected.push(`${file.name}: el tamaño debe ser menor de 5 MB`);
+          continue;
+        }
+        if (selectedAttachments.length >= maxAttachmentCount) {
+          rejected.push("Puedes adjuntar hasta 3 archivos");
+          break;
+        }
+        const totalSize = selectedAttachments.reduce((total, attachment) => total + attachment.size, 0);
+        if (totalSize + file.size > maxCombinedAttachmentSize) {
+          rejected.push("El tamaño combinado de los archivos no puede superar 8 MB");
+          continue;
+        }
+        selectedAttachments.push(file);
+      }
+      if (rejected.length) attachmentStatus.textContent = rejected.join(". ");
+      renderSelectedAttachments();
+    }
+
+    async function prepareAttachments(files) {
+      const prepared = [];
+      for (const file of files) {
+        const extension = file.name.split(".").pop().toLowerCase();
+        const type = attachmentTypes[extension];
+        if (type.kind === "text") {
+          prepared.push({
+            name: file.name,
+            type: type.mime,
+            content: (await file.text()).slice(0, 60000),
+          });
+          continue;
+        }
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        let binary = "";
+        for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+          binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+        }
+        prepared.push({ name: file.name, type: type.mime, data: btoa(binary) });
+      }
+      return prepared;
+    }
+
+    function clearSelectedAttachments() {
+      selectedAttachments = [];
+      attachmentInput.value = "";
+      attachmentStatus.textContent = "";
+      renderSelectedAttachments();
+    }
+
+    function loadConversations() {
+      try {
+        const savedConversations = localStorage.getItem(conversationsStorageKey);
+        if (!savedConversations) return [];
+        const parsedConversations = JSON.parse(savedConversations);
+        if (
+          !Array.isArray(parsedConversations) ||
+          parsedConversations.some(
+            (item) =>
+              typeof item.id !== "string" ||
+              typeof item.title !== "string" ||
+              typeof item.updatedAt !== "number" ||
+              !Array.isArray(item.messages) ||
+              item.messages.some(
+                (message) =>
+                  !["user", "model"].includes(message?.role) ||
+                  typeof message.text !== "string"
+              )
+          )
+        ) {
+          throw new Error("El formato guardado de las conversaciones no es válido.");
+        }
+        return parsedConversations;
+      } catch (error) {
+        console.error("No se pudieron cargar las conversaciones:", error);
+        conversationHistoryError = "No se pudieron cargar las conversaciones guardadas en este navegador.";
+        return [];
+      }
+    }
+
+    function saveConversations() {
+      try {
+        localStorage.setItem(conversationsStorageKey, JSON.stringify(conversations));
+        conversationHistoryError = "";
+        return true;
+      } catch (error) {
+        console.error("No se pudieron guardar las conversaciones:", error);
+        conversationHistoryError = "No se pudo guardar el chat en este navegador. Revisa el espacio disponible.";
+        return false;
+      }
+    }
+
+    function renderConversationHistory() {
+      conversationHistory.replaceChildren();
+      const sortedConversations = [...conversations].sort((a, b) => b.updatedAt - a.updatedAt);
+      if (conversationHistoryError) {
+        conversationHistoryStatus.textContent = conversationHistoryError;
+      } else if (sortedConversations.length === 0) {
+        conversationHistoryStatus.textContent = "Tus chats aparecerán aquí.";
+      } else {
+        conversationHistoryStatus.textContent = "";
+      }
+      if (sortedConversations.length === 0) {
+        return;
+      }
+
+      sortedConversations.forEach((item) => {
+        const entry = document.createElement("div");
+        entry.className = "conversation-entry";
+        if (item.id === activeConversationId) entry.classList.add("active");
+
+        const openButton = document.createElement("button");
+        openButton.className = "conversation-open";
+        openButton.type = "button";
+        openButton.textContent = item.title;
+        openButton.title = item.title;
+        openButton.setAttribute("aria-label", `Abrir conversación: ${item.title}`);
+        openButton.addEventListener("click", () => openConversation(item.id));
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "conversation-delete";
+        deleteButton.type = "button";
+        deleteButton.textContent = "×";
+        deleteButton.title = "Eliminar conversación";
+        deleteButton.setAttribute("aria-label", `Eliminar conversación: ${item.title}`);
+        deleteButton.addEventListener("click", () => deleteConversation(item.id));
+
+        entry.append(openButton, deleteButton);
+        conversationHistory.append(entry);
+      });
+    }
+
+    function persistConversation(id, conversationMessages) {
+      const item = conversations.find((entry) => entry.id === id);
+      if (!item) return;
+      item.messages = conversationMessages.map((message) => ({ ...message }));
+      item.updatedAt = Date.now();
+      saveConversations();
+      renderConversationHistory();
+    }
+
+    function persistActiveConversation() {
+      if (activeConversationId) persistConversation(activeConversationId, messages);
+    }
+
+    function openConversation(id) {
+      const item = conversations.find((entry) => entry.id === id);
+      if (!item) return;
+      stopSpeechPlayback();
+      activeConversationId = item.id;
+      clearSelectedAttachments();
+      messages.splice(0, messages.length, ...item.messages.map((message) => ({ ...message })));
+      conversation.replaceChildren();
+      item.messages.forEach((message) => {
+        const element = addMessage(message.displayText || message.text, message.role === "model" ? "assistant" : "user");
+        if (message.role === "model") addSpeechControl(element);
+      });
+      conversation.classList.toggle("visible", item.messages.length > 0);
+      welcome.hidden = item.messages.length > 0;
+      pendingStudyProblem = null;
+      promptInput.value = "";
+      renderConversationHistory();
+      setSidebarOpen(false);
+    }
+
+    function deleteConversation(id) {
+      conversations = conversations.filter((item) => item.id !== id);
+      if (activeConversationId === id) startNewChat();
+      saveConversations();
+      renderConversationHistory();
+    }
+
+    function ensureActiveConversation(firstMessage) {
+      if (activeConversationId) return;
+      const id = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const title = firstMessage.length > 42 ? `${firstMessage.slice(0, 39).trimEnd()}...` : firstMessage;
+      conversations.push({ id, title, updatedAt: Date.now(), messages: [] });
+      activeConversationId = id;
+      renderConversationHistory();
+    }
+
+    const defaultModules = [
+      {
+        id: "matematica",
+        name: "Matemática",
+        problems: ["Resuelve 2x + 5 = 17 paso a paso.", "Explica cómo factorizar x² - 5x + 6."],
+      },
+      {
+        id: "fisica",
+        name: "Física",
+        problems: ["Un auto recorre 150 km en 2 horas. ¿Cuál es su velocidad media?", "Explica la diferencia entre masa y peso con un ejemplo."],
+      },
+      {
+        id: "programacion",
+        name: "Programación",
+        problems: ["Explica qué es un ciclo y muestra un ejemplo sencillo.", "¿Cómo encontrarías el mayor número de una lista?"],
+      },
+    ];
+    const modulesStorageKey = scopedStorageKey("modules");
+    const learningProgressStorageKey = scopedStorageKey("learning-progress");
+    let expandedModuleId = null;
+    let pendingStudyProblem = null;
+    let pendingStudyModuleId = null;
+    const streakStorageKey = scopedStorageKey("study-streak");
+    const streakButton = document.querySelector("#study-streak-button");
+    const streakPanel = document.querySelector("#study-streak-panel");
+    const streakGuidance = document.querySelector("#streak-guidance");
+    let streakStorageErrorMessage = "";
+
+    function localDateKey(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function dateKeyDistance(from, to) {
+      const [fromYear, fromMonth, fromDay] = from.split("-").map(Number);
+      const [toYear, toMonth, toDay] = to.split("-").map(Number);
+      return Math.round(
+        (Date.UTC(toYear, toMonth - 1, toDay) - Date.UTC(fromYear, fromMonth - 1, fromDay)) /
+        86400000
+      );
+    }
+
+    function createEmptyStreak() {
+      return { current: 0, best: 0, lastActivityDate: null, activityDates: [] };
+    }
+
+    function loadStudyStreak() {
+      try {
+        const saved = localStorage.getItem(streakStorageKey);
+        if (!saved) return createEmptyStreak();
+        const parsed = JSON.parse(saved);
+        if (
+          !parsed ||
+          !Number.isInteger(parsed.current) ||
+          parsed.current < 0 ||
+          !Number.isInteger(parsed.best) ||
+          parsed.best < parsed.current ||
+          !(parsed.lastActivityDate === null || /^\d{4}-\d{2}-\d{2}$/.test(parsed.lastActivityDate)) ||
+          !Array.isArray(parsed.activityDates) ||
+          parsed.activityDates.some((date) => typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date))
+        ) {
+          throw new Error("El formato guardado de la racha no es válido.");
+        }
+        return {
+          current: parsed.current,
+          best: parsed.best,
+          lastActivityDate: parsed.lastActivityDate,
+          activityDates: [...new Set(parsed.activityDates)].slice(-30),
+        };
+      } catch (error) {
+        console.error("No se pudo cargar la racha de estudio:", error);
+        streakStorageErrorMessage = "No se pudo cargar la racha guardada. Puedes seguir practicando; revisa el almacenamiento del navegador.";
+        return createEmptyStreak();
+      }
+    }
+
+    let studyStreak = loadStudyStreak();
+
+    function saveStudyStreak() {
+      try {
+        localStorage.setItem(streakStorageKey, JSON.stringify(studyStreak));
+        return true;
+      } catch (error) {
+        console.error("No se pudo guardar la racha de estudio:", error);
+        streakStorageErrorMessage = "No se pudo guardar la racha en este navegador.";
+        return false;
+      }
+    }
+
+    function getStreakStatusMessage() {
+      if (streakStorageErrorMessage) return streakStorageErrorMessage;
+      const today = localDateKey();
+      if (studyStreak.lastActivityDate === today) {
+        return "¡Problema de hoy enviado! Tu racha está protegida hasta mañana.";
+      }
+      if (studyStreak.lastActivityDate && dateKeyDistance(studyStreak.lastActivityDate, today) > 1) {
+        return "La racha se reinició porque pasó un día sin enviar un problema. ¡Puedes empezar otra hoy!";
+      }
+      return "Envía un problema de una materia a la IA cada día para mantener tu racha.";
+    }
+
+    function renderStudyStreak() {
+      document.querySelector("#streak-count").textContent = String(studyStreak.current);
+      document.querySelector("#streak-current").textContent = String(studyStreak.current);
+      document.querySelector("#streak-best").textContent = String(studyStreak.best);
+      streakGuidance.textContent = getStreakStatusMessage();
+      streakGuidance.dataset.state = streakStorageErrorMessage ? "error" : "";
+
+      const week = document.querySelector("#streak-week");
+      week.replaceChildren();
+      const today = new Date();
+      const todayKey = localDateKey(today);
+      for (let daysAgo = 6; daysAgo >= 0; daysAgo -= 1) {
+        const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() - daysAgo);
+        const dateKey = localDateKey(date);
+        const day = document.createElement("div");
+        day.className = "streak-day";
+        const hasActivity = studyStreak.activityDates.includes(dateKey);
+        if (hasActivity) day.classList.add("active");
+        if (dateKey === todayKey) day.classList.add("today");
+        day.setAttribute("aria-label", `${new Intl.DateTimeFormat("es", { weekday: "long", day: "numeric" }).format(date)}${hasActivity ? ", actividad completada" : ", sin actividad"}`);
+        const label = document.createElement("span");
+        label.textContent = new Intl.DateTimeFormat("es", { weekday: "short" }).format(date).replace(".", "");
+        const mark = document.createElement("span");
+        mark.className = "streak-day-mark";
+        mark.textContent = hasActivity ? "🔥" : String(date.getDate());
+        day.append(label, mark);
+        week.append(day);
+      }
+    }
+
+    function synchronizeStudyStreak() {
+      const lastActivityDate = studyStreak.lastActivityDate;
+      if (lastActivityDate && dateKeyDistance(lastActivityDate, localDateKey()) > 1) {
+        studyStreak.current = 0;
+        saveStudyStreak();
+      }
+      renderStudyStreak();
+    }
+
+    function recordStudyProblem() {
+      const today = localDateKey();
+      if (studyStreak.lastActivityDate !== today) {
+        const daysSinceLastActivity = studyStreak.lastActivityDate
+          ? dateKeyDistance(studyStreak.lastActivityDate, today)
+          : null;
+        studyStreak.current = daysSinceLastActivity === 1 ? studyStreak.current + 1 : 1;
+        studyStreak.best = Math.max(studyStreak.best, studyStreak.current);
+        studyStreak.lastActivityDate = today;
+        studyStreak.activityDates = [...studyStreak.activityDates.filter((date) => date !== today), today].slice(-30);
+      }
+      const saved = saveStudyStreak();
+      if (saved) streakStorageErrorMessage = "";
+      renderStudyStreak();
+      if (saved && !streakPanel.hidden) {
+        streakGuidance.textContent = "¡Problema enviado! Tu actividad de hoy ya cuenta para la racha.";
+      }
+    }
+
+    streakButton.addEventListener("click", () => {
+      const isOpening = streakPanel.hidden;
+      streakPanel.hidden = !isOpening;
+      streakButton.setAttribute("aria-expanded", String(isOpening));
+      streakButton.setAttribute("aria-label", isOpening ? "Cerrar racha de estudio" : "Abrir racha de estudio");
+      if (isOpening) renderStudyStreak();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!streakPanel.hidden && !streakPanel.contains(event.target) && !streakButton.contains(event.target)) {
+        streakPanel.hidden = true;
+        streakButton.setAttribute("aria-expanded", "false");
+        streakButton.setAttribute("aria-label", "Abrir racha de estudio");
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !streakPanel.hidden) {
+        streakPanel.hidden = true;
+        streakButton.setAttribute("aria-expanded", "false");
+        streakButton.setAttribute("aria-label", "Abrir racha de estudio");
+        streakButton.focus();
+      }
+    });
+
+    synchronizeStudyStreak();
+
+    function loadModules() {
+      try {
+        const savedModules = localStorage.getItem(modulesStorageKey);
+        if (!savedModules) {
+          const defaults = copyDefaultModules();
+          localStorage.setItem(modulesStorageKey, JSON.stringify(defaults));
+          return defaults;
+        }
+        const parsedModules = JSON.parse(savedModules);
+        if (
+          !Array.isArray(parsedModules) ||
+          parsedModules.some(
+            (module) =>
+              typeof module.id !== "string" ||
+              typeof module.name !== "string" ||
+              !Array.isArray(module.problems) ||
+              (module.generatedProblem !== undefined && typeof module.generatedProblem !== "string") ||
+              module.problems.some((problem) => typeof problem !== "string")
+          )
+        ) {
+          throw new Error("El formato guardado de módulos no es válido.");
+        }
+        return parsedModules;
+      } catch (error) {
+        console.error("No se pudieron cargar los módulos guardados:", error);
+        moduleStatus.textContent = "No se pudieron cargar los módulos guardados. Se mostrarán los módulos iniciales.";
+        return copyDefaultModules();
+      }
+    }
+
+    function copyDefaultModules() {
+      return defaultModules.map((module) => ({ ...module, problems: [...module.problems] }));
+    }
+
+    let modules = loadModules();
+    const dailyProblemRequests = new Set();
+    let learningProgressError = "";
+    let progressDisplayModuleId = modules[0]?.id || null;
+
+    function loadLearningProgress() {
+      try {
+        const savedProgress = localStorage.getItem(learningProgressStorageKey);
+        if (!savedProgress) return {};
+        const parsedProgress = JSON.parse(savedProgress);
+        if (!parsedProgress || typeof parsedProgress !== "object" || Array.isArray(parsedProgress)) {
+          throw new Error("El formato guardado del progreso no es válido.");
+        }
+        return Object.fromEntries(
+          Object.entries(parsedProgress)
+            .filter(([, progress]) =>
+              progress &&
+              Number.isInteger(progress.points) &&
+              progress.points >= 0 &&
+              Array.isArray(progress.pendingTests) &&
+              Array.isArray(progress.administeredTests)
+            )
+            .map(([moduleId, progress]) => [
+              moduleId,
+              {
+                points: progress.points,
+                pendingTests: [...new Set(progress.pendingTests.filter((level) =>
+                  Number.isInteger(level) && level > 0 && level % 10 === 0
+                ))],
+                administeredTests: [...new Set(progress.administeredTests.filter((level) =>
+                  Number.isInteger(level) && level > 0 && level % 10 === 0
+                ))],
+              },
+            ])
+        );
+      } catch (error) {
+        console.error("No se pudo cargar el progreso por materia:", error);
+        learningProgressError = "No se pudo cargar el progreso guardado en este navegador.";
+        return {};
+      }
+    }
+
+    let learningProgress = loadLearningProgress();
+
+    function getModuleLearningProgress(moduleId) {
+      if (!learningProgress[moduleId]) {
+        learningProgress[moduleId] = { points: 0, pendingTests: [], administeredTests: [] };
+      }
+      return learningProgress[moduleId];
+    }
+
+    function saveLearningProgress() {
+      try {
+        localStorage.setItem(learningProgressStorageKey, JSON.stringify(learningProgress));
+        learningProgressError = "";
+        return true;
+      } catch (error) {
+        console.error("No se pudo guardar el progreso por materia:", error);
+        learningProgressError = "No se pudo guardar el progreso. Revisa el espacio disponible del navegador.";
+        return false;
+      }
+    }
+
+    function getModuleLevel(progress) {
+      return Math.floor(progress.points / 100) + 1;
+    }
+
+    const wallpaperStorageKey = scopedStorageKey("assistant-wallpaper");
+    const wallpaperUnlockedStorageKey = scopedStorageKey("assistant-wallpaper-unlocked");
+    let wallpaperUnlocked = false;
+    let hasCustomWallpaper = false;
+    let wallpaperStatusMessage = "";
+
+    function setWallpaperStatus(message) {
+      wallpaperStatusMessage = message;
+      wallpaperStatus.textContent = message;
+    }
+
+    function startWallpaperVideo() {
+      wallpaperVideo.hidden = false;
+      void wallpaperVideo.play().catch((error) => {
+        console.error("No se pudo iniciar el fondo animado:", error);
+        wallpaperStatusMessage = "Fondo animado no disponible ahora. El fondo de BrainMach sigue visible.";
+        renderWallpaperControls();
+      });
+    }
+
+    function renderWallpaperControls() {
+      wallpaperUploadButton.disabled = !wallpaperUnlocked;
+      wallpaperUploadButton.textContent = wallpaperUnlocked ? "Elegir imagen" : "Bloqueado · nivel 5";
+      wallpaperResetButton.hidden = !hasCustomWallpaper;
+      wallpaperResetButton.disabled = !wallpaperUnlocked || !hasCustomWallpaper;
+      wallpaperStatus.textContent = wallpaperStatusMessage || (wallpaperUnlocked
+        ? "Personalización desbloqueada. Elige una imagen JPG, PNG o WebP."
+        : "Alcanza el nivel 5 en cualquier materia para personalizar el fondo.");
+    }
+
+    function loadWallpaperSettings() {
+      try {
+        wallpaperUnlocked = localStorage.getItem(wallpaperUnlockedStorageKey) === "true";
+        const savedWallpaper = localStorage.getItem(wallpaperStorageKey);
+        if (savedWallpaper && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(savedWallpaper)) {
+          document.body.style.setProperty("--assistant-wallpaper", `url("${savedWallpaper}")`);
+          document.body.classList.add("has-custom-wallpaper");
+          wallpaperVideo.hidden = true;
+          hasCustomWallpaper = true;
+        } else if (savedWallpaper) {
+          localStorage.removeItem(wallpaperStorageKey);
+          wallpaperStatusMessage = "El fondo guardado no es válido y se restauró el fondo de BrainMach.";
+        }
+      } catch (error) {
+        console.error("No se pudo cargar la personalización del fondo:", error);
+        wallpaperStatusMessage = "No se pudo cargar el fondo guardado en este navegador.";
+      }
+      if (!hasCustomWallpaper) startWallpaperVideo();
+      renderWallpaperControls();
+    }
+
+    function unlockWallpaper() {
+      if (wallpaperUnlocked) return;
+      wallpaperUnlocked = true;
+      wallpaperStatusMessage = "¡Fondo desbloqueado! Ya puedes elegir una imagen JPG, PNG o WebP.";
+      try {
+        localStorage.setItem(wallpaperUnlockedStorageKey, "true");
+      } catch (error) {
+        console.error("No se pudo guardar el desbloqueo del fondo:", error);
+        wallpaperStatusMessage = "Desbloqueo disponible en esta sesión, pero no se pudo guardar en el navegador.";
+      }
+      renderWallpaperControls();
+    }
+
+    function saveCustomWallpaper(file) {
+      if (!wallpaperUnlocked || !file) return;
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        setWallpaperStatus("Elige una imagen JPG, PNG o WebP.");
+        wallpaperInput.value = "";
+        return;
+      }
+      if (file.size === 0 || file.size > 5 * 1024 * 1024) {
+        setWallpaperStatus("La imagen debe pesar menos de 5 MB.");
+        wallpaperInput.value = "";
+        return;
+      }
+
+      const imageUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        try {
+          if (image.naturalWidth === 0 || image.naturalHeight === 0) {
+            throw new Error("La imagen no tiene dimensiones válidas.");
+          }
+          const scale = Math.min(1, 1920 / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("No se pudo procesar la imagen.");
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          const savedWallpaper = canvas.toDataURL("image/jpeg", 0.8);
+          localStorage.setItem(wallpaperStorageKey, savedWallpaper);
+          document.body.style.setProperty("--assistant-wallpaper", `url("${savedWallpaper}")`);
+          document.body.classList.add("has-custom-wallpaper");
+          wallpaperVideo.hidden = true;
+          hasCustomWallpaper = true;
+          wallpaperStatusMessage = "Fondo actualizado y guardado en este navegador.";
+          renderWallpaperControls();
+        } catch (error) {
+          console.error("No se pudo guardar el fondo personalizado:", error);
+          setWallpaperStatus("No se pudo guardar el fondo. Libera espacio en el navegador e inténtalo otra vez.");
+        } finally {
+          URL.revokeObjectURL(imageUrl);
+          wallpaperInput.value = "";
+        }
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(imageUrl);
+        wallpaperInput.value = "";
+        setWallpaperStatus("No se pudo leer la imagen. Prueba con otro archivo JPG, PNG o WebP.");
+      };
+      image.src = imageUrl;
+    }
+
+    loadWallpaperSettings();
+    if (Object.values(learningProgress).some((progress) => getModuleLevel(progress) >= 5)) {
+      unlockWallpaper();
+    }
+
+    function renderLearningProgress() {
+      learningModuleList.replaceChildren();
+      const selectedModule =
+        modules.find((module) => module.id === progressDisplayModuleId) ||
+        modules.find((module) => module.id === expandedModuleId) ||
+        modules[0];
+      progressDisplayModuleId = selectedModule?.id || null;
+
+      if (selectedModule) {
+        const progress = getModuleLearningProgress(selectedModule.id);
+        const level = getModuleLevel(progress);
+        const pointsIntoLevel = progress.points % 100;
+        learningProgressLevel.textContent = `Nivel ${level}`;
+        learningProgressModule.textContent = selectedModule.name;
+        learningProgressButton.title = `Nivel ${level} de ${selectedModule.name}: ${pointsIntoLevel} de 100 puntos para el siguiente nivel`;
+        learningProgressButton.setAttribute(
+          "aria-label",
+          `Nivel ${level} de ${selectedModule.name}, ${pointsIntoLevel} de 100 puntos para el siguiente nivel`
+        );
+        learningProgressBar.setAttribute("aria-valuenow", String(pointsIntoLevel));
+        learningProgressFill.classList.toggle("has-progress", pointsIntoLevel > 0);
+        learningProgressFill.style.width = `${pointsIntoLevel}%`;
+      } else {
+        learningProgressLevel.textContent = "Nivel --";
+        learningProgressModule.textContent = "Sin materias";
+        learningProgressButton.title = "Agrega una materia para iniciar el progreso";
+        learningProgressButton.setAttribute("aria-label", learningProgressButton.title);
+        learningProgressBar.setAttribute("aria-valuenow", "0");
+        learningProgressFill.classList.remove("has-progress");
+        learningProgressFill.style.width = "0%";
+      }
+
+      if (modules.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "learning-module-empty";
+        empty.textContent = "Agrega una materia para comenzar a ganar niveles.";
+        learningModuleList.append(empty);
+        return;
+      }
+
+      modules.forEach((module) => {
+        const progress = getModuleLearningProgress(module.id);
+        const level = getModuleLevel(progress);
+        const pointsIntoLevel = progress.points % 100;
+        const row = document.createElement("article");
+        row.className = "learning-module-row";
+
+        const heading = document.createElement("div");
+        heading.className = "learning-module-heading";
+        const name = document.createElement("span");
+        name.className = "learning-module-name";
+        name.textContent = module.name;
+        const levelLabel = document.createElement("span");
+        levelLabel.className = "learning-module-level";
+        levelLabel.textContent = `Nivel ${level}`;
+        heading.append(name, levelLabel);
+
+        const track = document.createElement("div");
+        track.className = "module-progress-track";
+        track.setAttribute("role", "progressbar");
+        track.setAttribute("aria-label", `Progreso de ${module.name} al nivel ${level + 1}`);
+        track.setAttribute("aria-valuemin", "0");
+        track.setAttribute("aria-valuemax", "100");
+        track.setAttribute("aria-valuenow", String(pointsIntoLevel));
+        const fill = document.createElement("span");
+        fill.className = "module-progress-fill";
+        fill.style.width = `${pointsIntoLevel}%`;
+        track.append(fill);
+
+        const meta = document.createElement("div");
+        meta.className = "learning-module-meta";
+        const pointLabel = document.createElement("span");
+        pointLabel.textContent = `${pointsIntoLevel} / 100 puntos`;
+        const nextTestLevel = (Math.floor(level / 10) + 1) * 10;
+        const testLabel = document.createElement("span");
+        testLabel.textContent = `Test en nivel ${nextTestLevel}`;
+        meta.append(pointLabel, testLabel);
+
+        row.append(heading, track, meta);
+        progress.pendingTests.forEach((testLevel) => {
+          const testButton = document.createElement("button");
+          testButton.className = "learning-module-test";
+          testButton.type = "button";
+          testButton.textContent = `Iniciar test del nivel ${testLevel}`;
+          testButton.addEventListener("click", () => startModuleLearningTest(module.id, testLevel));
+          row.append(testButton);
+        });
+        learningModuleList.append(row);
+      });
+
+      if (learningProgressError) {
+        const error = document.createElement("p");
+        error.className = "learning-module-empty";
+        error.setAttribute("role", "status");
+        error.textContent = learningProgressError;
+        learningModuleList.append(error);
+      }
+    }
+
+    function findModuleForTopic(topic) {
+      const normalizedTopic = normalizeText(topic);
+      return modules.find((module) => normalizeText(module.name).includes(normalizedTopic));
+    }
+
+    function awardModuleLearningProgress(moduleId) {
+      const module = modules.find((item) => item.id === moduleId);
+      if (!module) return null;
+      const progress = getModuleLearningProgress(moduleId);
+      const previousLevel = getModuleLevel(progress);
+      progress.points += 20;
+      const newLevel = getModuleLevel(progress);
+      let testLevel = null;
+      if (
+        newLevel > previousLevel &&
+        newLevel % 10 === 0 &&
+        !progress.administeredTests.includes(newLevel) &&
+        !progress.pendingTests.includes(newLevel)
+      ) {
+        progress.pendingTests.push(newLevel);
+        testLevel = newLevel;
+      }
+      saveLearningProgress();
+      if (newLevel >= 5) unlockWallpaper();
+      renderLearningProgress();
+      return testLevel === null ? null : { module, level: testLevel };
+    }
+
+    function startModuleLearningTest(moduleId, level) {
+      const module = modules.find((item) => item.id === moduleId);
+      const progress = learningProgress[moduleId];
+      if (!module || !progress?.pendingTests.includes(level)) return;
+      learningProgressPanel.hidden = true;
+      learningProgressButton.setAttribute("aria-expanded", "false");
+      setSidebarOpen(false);
+      sendChatMessage(
+        `Alcanzaste el nivel ${level} de ${module.name}. Administra ahora el test de ese hito: prepara cinco preguntas breves y progresivas que evalúen los conocimientos de ${module.name}. Presenta todas numeradas, no incluyas ni reveles las respuestas, y pide que responda con el número de cada pregunta. Cuando responda, corrige cada respuesta con paciencia, explica los errores y comunica claramente el resultado.`,
+        {
+          displayText: `Test de nivel ${level}: ${module.name}`,
+          progressTest: { moduleId, level },
+        }
+      );
+    }
+
+    function completeModuleLearningTest(moduleId, level) {
+      const progress = learningProgress[moduleId];
+      if (!progress?.pendingTests.includes(level)) return;
+      progress.pendingTests = progress.pendingTests.filter((pendingLevel) => pendingLevel !== level);
+      if (!progress.administeredTests.includes(level)) progress.administeredTests.push(level);
+      progress.administeredTests.sort((a, b) => a - b);
+      saveLearningProgress();
+      renderLearningProgress();
+    }
+
+    function setSidebarOpen(isOpen) {
+      app.classList.toggle("sidebar-open", isOpen);
+      sidebarToggle.setAttribute("aria-expanded", String(isOpen));
+      sidebarToggle.setAttribute("aria-label", isOpen ? "Cerrar menú de módulos" : "Abrir menú de módulos");
+      sidebarBackdrop.tabIndex = isOpen ? 0 : -1;
+    }
+
+    function setToolboxOpen(isOpen) {
+      toolboxPanel.hidden = !isOpen;
+      toolboxToggle.setAttribute("aria-expanded", String(isOpen));
+      toolboxToggle.setAttribute("aria-label", isOpen ? "Cerrar herramientas" : "Abrir herramientas");
+    }
+
+    function positionChatTour() {
+      if (chatTour.hidden || activeTourStep < 0) return;
+      const step = chatTourSteps[activeTourStep];
+      const target = document.querySelector(step.selector);
+      if (!target) return;
+
+      const rect = target.getBoundingClientRect();
+      const padding = 6;
+      const top = Math.max(8, rect.top - padding);
+      const left = Math.max(8, rect.left - padding);
+      const width = Math.min(window.innerWidth - left - 8, rect.width + padding * 2);
+      const height = Math.min(window.innerHeight - top - 8, rect.height + padding * 2);
+      chatTourSpotlight.style.top = `${top}px`;
+      chatTourSpotlight.style.left = `${left}px`;
+      chatTourSpotlight.style.width = `${Math.max(28, width)}px`;
+      chatTourSpotlight.style.height = `${Math.max(28, height)}px`;
+
+      const cardRect = chatTourCard.getBoundingClientRect();
+      const cardWidth = cardRect.width || Math.min(360, window.innerWidth - 28);
+      const cardHeight = cardRect.height || 190;
+      const cardLeft = Math.min(
+        Math.max(14, rect.left + rect.width / 2 - cardWidth / 2),
+        window.innerWidth - cardWidth - 14
+      );
+      let cardTop;
+      if (window.innerHeight - rect.bottom >= cardHeight + 24) {
+        cardTop = rect.bottom + 16;
+      } else if (rect.top >= cardHeight + 24) {
+        cardTop = rect.top - cardHeight - 16;
+      } else {
+        cardTop = Math.max(14, (window.innerHeight - cardHeight) / 2);
+      }
+      chatTourCard.style.top = `${Math.min(cardTop, window.innerHeight - cardHeight - 14)}px`;
+      chatTourCard.style.left = `${cardLeft}px`;
+    }
+
+    function showChatTourStep(index) {
+      if (index < 0 || index >= chatTourSteps.length) {
+        closeChatTour();
+        return;
+      }
+      activeTourStep = index;
+      const step = chatTourSteps[index];
+      if (index >= 1 && index <= 3) {
+        setToolboxOpen(false);
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+      if (index === 7) {
+        setToolboxOpen(true);
+      } else if (index !== 6) {
+        setToolboxOpen(false);
+      }
+      streakPanel.hidden = true;
+      streakButton.setAttribute("aria-expanded", "false");
+      learningProgressPanel.hidden = true;
+      learningProgressButton.setAttribute("aria-expanded", "false");
+
+      chatTourTitle.textContent = step.title;
+      chatTourDescription.textContent = step.description;
+      chatTourCount.textContent = `Paso ${index + 1} de ${chatTourSteps.length}`;
+      chatTourBack.disabled = index === 0;
+      chatTourNext.textContent = index === chatTourSteps.length - 1 ? "Terminar" : "Siguiente";
+      chatTour.hidden = false;
+
+      const target = document.querySelector(step.selector);
+      if (!target) {
+        closeChatTour();
+        return;
+      }
+      target.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "nearest",
+        inline: "nearest",
+      });
+      const positionDelay = index === 1 ? 350 : 0;
+      window.setTimeout(() => {
+        if (activeTourStep !== index || chatTour.hidden) return;
+        positionChatTour();
+        chatTourNext.focus({ preventScroll: true });
+      }, positionDelay);
+    }
+
+    function startChatTour() {
+      tourReturnFocus = document.activeElement;
+      showChatTourStep(0);
+    }
+
+    function closeChatTour() {
+      activeTourStep = -1;
+      chatTour.hidden = true;
+      chatTourSpotlight.removeAttribute("style");
+      chatTourCard.removeAttribute("style");
+      setSidebarOpen(false);
+      setToolboxOpen(false);
+      if (tourReturnFocus instanceof HTMLElement && tourReturnFocus.isConnected) {
+        tourReturnFocus.focus({ preventScroll: true });
+      }
+    }
+
+    document.querySelector("#start-chat-tour").addEventListener("click", startChatTour);
+    chatTourNext.addEventListener("click", () => showChatTourStep(activeTourStep + 1));
+    chatTourBack.addEventListener("click", () => showChatTourStep(activeTourStep - 1));
+    chatTourExit.addEventListener("click", closeChatTour);
+    window.addEventListener("resize", positionChatTour);
+    window.addEventListener("scroll", positionChatTour, true);
+
+    learningProgressButton.addEventListener("click", () => {
+      const isOpening = learningProgressPanel.hidden;
+      learningProgressPanel.hidden = !isOpening;
+      learningProgressButton.setAttribute("aria-expanded", String(isOpening));
+      if (isOpening) renderLearningProgress();
+    });
+
+    wallpaperUploadButton.addEventListener("click", () => wallpaperInput.click());
+    wallpaperInput.addEventListener("change", () => saveCustomWallpaper(wallpaperInput.files[0]));
+    wallpaperResetButton.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(wallpaperStorageKey);
+        document.body.style.removeProperty("--assistant-wallpaper");
+        document.body.classList.remove("has-custom-wallpaper");
+        startWallpaperVideo();
+        hasCustomWallpaper = false;
+        wallpaperStatusMessage = "Se restableció el fondo futurista de BrainMach.";
+        renderWallpaperControls();
+      } catch (error) {
+        console.error("No se pudo restablecer el fondo:", error);
+        setWallpaperStatus("No se pudo restablecer el fondo guardado.");
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      if (
+        !learningProgressPanel.hidden &&
+        !learningProgressPanel.contains(event.target) &&
+        !learningProgressButton.contains(event.target)
+      ) {
+        learningProgressPanel.hidden = true;
+        learningProgressButton.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    toolboxToggle.addEventListener("click", () => {
+      setToolboxOpen(toolboxToggle.getAttribute("aria-expanded") !== "true");
+    });
+    sidebarToggle.addEventListener("click", () => {
+      setSidebarOpen(sidebarToggle.getAttribute("aria-expanded") !== "true");
+    });
+    document.querySelector("#open-pythagoras").addEventListener("click", () => {
+      setToolboxOpen(false);
+      openPythagorasTool();
+      setSidebarOpen(false);
+    });
+    document.querySelector("#open-calculus-graph").addEventListener("click", () => {
+      setToolboxOpen(false);
+      openGraphTool();
+      setSidebarOpen(false);
+    });
+    sidebarBackdrop.addEventListener("click", () => setSidebarOpen(false));
+    document.addEventListener("keydown", (event) => {
+      if (!chatTour.hidden) {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeChatTour();
+        } else if (event.key === "Tab") {
+          const focusableButtons = Array.from(chatTourCard.querySelectorAll("button:not(:disabled)"));
+          const firstButton = focusableButtons[0];
+          const lastButton = focusableButtons[focusableButtons.length - 1];
+          if (event.shiftKey && document.activeElement === firstButton) {
+            event.preventDefault();
+            lastButton.focus();
+          } else if (!event.shiftKey && document.activeElement === lastButton) {
+            event.preventDefault();
+            firstButton.focus();
+          }
+        }
+        return;
+      }
+      if (event.key === "Escape") {
+        setSidebarOpen(false);
+        setToolboxOpen(false);
+        learningProgressPanel.hidden = true;
+        learningProgressButton.setAttribute("aria-expanded", "false");
+      }
+    });
+    document.addEventListener("click", (event) => {
+      if (chatTour.hidden && !event.target.closest(".toolbox")) setToolboxOpen(false);
+    });
+
+    function normalizeText(text) {
+      return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
+    function closeAssistantTool(tool) {
+      tool.remove();
+      if (conversation.childElementCount === 0) {
+        conversation.classList.remove("visible");
+        welcome.hidden = false;
+      }
+      requestAnimationFrame(() => {
+        form.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "nearest",
+        });
+        promptInput.focus({ preventScroll: true });
+      });
+    }
+
+    function addToolCloseButton(tool) {
+      const closeButton = document.createElement("button");
+      closeButton.className = "tool-close";
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Cerrar apartado y volver al chat");
+      closeButton.title = "Volver al chat";
+      closeButton.textContent = "×";
+      closeButton.addEventListener("click", () => closeAssistantTool(tool));
+      tool.append(closeButton);
+    }
+
+    function removeOtherAssistantTools(activeTool) {
+      conversation.querySelectorAll(".geometry-tool, .graph-tool").forEach((tool) => {
+        if (tool !== activeTool) tool.remove();
+      });
+    }
+
+    function compileGraphExpression(expression, parameterValues) {
+      expression = expression.replace(/^\s*y\s*=\s*/i, "");
+      const tokens = [];
+      const tokenPattern = /\s*(\d+(?:\.\d*)?(?:[eE][+-]?\d+)?|\.\d+(?:[eE][+-]?\d+)?|[A-Za-z]+|[()+\-*/^,])/y;
+      let position = 0;
+      while (position < expression.length) {
+        tokenPattern.lastIndex = position;
+        const match = tokenPattern.exec(expression);
+        if (!match) {
+          if (/^\s*$/.test(expression.slice(position))) break;
+          throw new Error(`Carácter no válido: "${expression[position]}".`);
+        }
+        tokens.push(match[1]);
+        position = tokenPattern.lastIndex;
+      }
+      if (!tokens.length) throw new Error("Escribe una función para graficar.");
+
+      let index = 0;
+      const peek = () => tokens[index];
+      const take = () => tokens[index++];
+      const expect = (value) => {
+        if (take() !== value) throw new Error(`Se esperaba "${value}".`);
+      };
+      const functions = {
+        sin: Math.sin, cos: Math.cos, tan: Math.tan,
+        asin: Math.asin, acos: Math.acos, atan: Math.atan,
+        sqrt: Math.sqrt, abs: Math.abs, ln: Math.log,
+        log: Math.log10, exp: Math.exp, floor: Math.floor,
+        ceil: Math.ceil, round: Math.round,
+      };
+
+      function parsePrimary() {
+        const token = take();
+        if (token === undefined) throw new Error("La expresión está incompleta.");
+        if (/^(?:\d|\.)/.test(token)) {
+          const value = Number(token);
+          return () => value;
+        }
+        if (token === "(") {
+          const value = parseExpression();
+          expect(")");
+          return value;
+        }
+        if (/^[A-Za-z]+$/.test(token)) {
+          const name = token.toLowerCase();
+          if (name === "x") return (x) => x;
+          if (name === "pi") return () => Math.PI;
+          if (name === "e") return () => Math.E;
+          if (Object.hasOwn(parameterValues, name)) return () => parameterValues[name];
+          if (!Object.hasOwn(functions, name) && name !== "min" && name !== "max" && name !== "pow") {
+            throw new Error(`No reconozco "${token}".`);
+          }
+          expect("(");
+          const args = [parseExpression()];
+          while (peek() === ",") {
+            take();
+            args.push(parseExpression());
+          }
+          expect(")");
+          if (name === "pow" && args.length !== 2) throw new Error("pow necesita dos valores.");
+          if ((name === "min" || name === "max") && args.length < 2) {
+            throw new Error(`${name} necesita al menos dos valores.`);
+          }
+          if (Object.hasOwn(functions, name) && args.length !== 1) {
+            throw new Error(`${name} necesita un solo valor.`);
+          }
+          return (x) => {
+            const values = args.map((arg) => arg(x));
+            if (name === "min") return Math.min(...values);
+            if (name === "max") return Math.max(...values);
+            if (name === "pow") return Math.pow(values[0], values[1]);
+            return functions[name](values[0]);
+          };
+        }
+        throw new Error(`No esperaba "${token}".`);
+      }
+
+      function parsePower() {
+        const left = parsePrimary();
+        if (peek() === "^") {
+          take();
+          const right = parseUnary();
+          return (x) => Math.pow(left(x), right(x));
+        }
+        return left;
+      }
+
+      function parseUnary() {
+        if (peek() === "+") {
+          take();
+          return parseUnary();
+        }
+        if (peek() === "-") {
+          take();
+          const value = parseUnary();
+          return (x) => -value(x);
+        }
+        return parsePower();
+      }
+
+      function parseTerm() {
+        let left = parseUnary();
+        while (true) {
+          const operator = peek();
+          if (operator === "*" || operator === "/") {
+            take();
+            const right = parseUnary();
+            const previous = left;
+            left = operator === "*"
+              ? (x) => previous(x) * right(x)
+              : (x) => previous(x) / right(x);
+          } else if (
+            operator !== undefined &&
+            (/^(?:\d|\.)/.test(operator) || /^[A-Za-z]+$/.test(operator) || operator === "(")
+          ) {
+            const right = parseUnary();
+            const previous = left;
+            left = (x) => previous(x) * right(x);
+          } else {
+            return left;
+          }
+        }
+      }
+
+      function parseExpression() {
+        let left = parseTerm();
+        while (peek() === "+" || peek() === "-") {
+          const operator = take();
+          const right = parseTerm();
+          const previous = left;
+          left = operator === "+"
+            ? (x) => previous(x) + right(x)
+            : (x) => previous(x) - right(x);
+        }
+        return left;
+      }
+
+      const result = parseExpression();
+      if (index !== tokens.length) throw new Error(`No esperaba "${peek()}".`);
+      return result;
+    }
+
+    function openGraphTool() {
+      const existingTool = conversation.querySelector(".graph-tool");
+      removeOtherAssistantTools(existingTool);
+      if (existingTool) {
+        welcome.hidden = true;
+        conversation.classList.add("visible");
+        existingTool.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+          block: "nearest",
+        });
+        return;
+      }
+
+      welcome.hidden = true;
+      conversation.classList.add("visible");
+
+      const tool = document.createElement("section");
+      tool.className = "message assistant graph-tool";
+      tool.setAttribute("aria-labelledby", "graph-title");
+      tool.innerHTML = `
+        <h2 class="graph-title" id="graph-title">Graficador de Cálculo Diferencial</h2>
+        <p class="graph-description">Escribe una o más funciones y ajusta la ventana de coordenadas, como en una calculadora gráfica.</p>
+        <div class="graph-layout">
+          <div class="graph-canvas-wrap"><canvas class="graph-canvas" id="graph-canvas" aria-label="Gráfica cartesiana interactiva"></canvas></div>
+          <div class="graph-editor">
+            <div class="graph-expressions" id="graph-expressions" aria-label="Funciones"></div>
+            <button class="graph-control-button graph-add-expression" id="graph-add" type="button">+ Agregar función</button>
+            <div class="graph-parameters" id="graph-parameters" aria-label="Parámetros ajustables"></div>
+            <div class="graph-range-grid" aria-label="Rango de los ejes">
+              <label class="graph-range">x mín.<input id="graph-x-min" type="number" step="any" value="-10"></label>
+              <label class="graph-range">x máx.<input id="graph-x-max" type="number" step="any" value="10"></label>
+              <label class="graph-range">y mín.<input id="graph-y-min" type="number" step="any" value="-10"></label>
+              <label class="graph-range">y máx.<input id="graph-y-max" type="number" step="any" value="10"></label>
+            </div>
+            <div class="graph-controls">
+              <button class="graph-control-button" id="graph-zoom-in" type="button" aria-label="Acercar">＋ Zoom</button>
+              <button class="graph-control-button" id="graph-zoom-out" type="button" aria-label="Alejar">− Zoom</button>
+              <button class="graph-control-button" id="graph-reset" type="button">Restablecer vista</button>
+            </div>
+            <p class="graph-status" id="graph-status" role="status" aria-live="polite"></p>
+            <p class="graph-help">Usa x, +, −, *, /, ^, paréntesis y funciones sin(), cos(), tan(), sqrt(), abs(), ln(), log(), exp(), min() y max(). Las letras como a o b crean controles deslizantes. Arrastra la gráfica o usa la rueda para acercar.</p>
+          </div>
+        </div>
+        <button class="graph-control-button graph-send" id="graph-send" type="button">Consultar estas funciones a la IA</button>
+      `;
+      addToolCloseButton(tool);
+      conversation.append(tool);
+
+      const canvas = tool.querySelector("#graph-canvas");
+      const context = canvas.getContext("2d");
+      const expressions = tool.querySelector("#graph-expressions");
+      const parametersPanel = tool.querySelector("#graph-parameters");
+      const status = tool.querySelector("#graph-status");
+      const graphSendButton = tool.querySelector("#graph-send");
+      const axisInputs = ["x-min", "x-max", "y-min", "y-max"].map((id) =>
+        tool.querySelector(`#graph-${id}`)
+      );
+      const defaultView = { xMin: -10, xMax: 10, yMin: -10, yMax: 10 };
+      let view = { ...defaultView };
+      let graphIsValid = true;
+      let dragState = null;
+      let graphFrame = 0;
+      let expressionId = 0;
+      const parameterValues = Object.create(null);
+
+      function setGraphStatus(message, state = "") {
+        status.textContent = message;
+        status.dataset.state = state;
+      }
+
+      function addGraphExpression(expression = "", color = "#16b8ff") {
+        const row = document.createElement("div");
+        row.className = "graph-expression-row";
+        const colorInput = document.createElement("input");
+        colorInput.className = "graph-color";
+        colorInput.type = "color";
+        colorInput.value = color;
+        colorInput.setAttribute("aria-label", "Color de la función");
+        const input = document.createElement("input");
+        input.className = "graph-expression";
+        input.type = "text";
+        input.value = expression;
+        input.placeholder = "Ej.: x^2";
+        input.autocomplete = "off";
+        input.spellcheck = false;
+        input.setAttribute("aria-label", `Función ${++expressionId}`);
+        const removeButton = document.createElement("button");
+        removeButton.className = "graph-remove";
+        removeButton.type = "button";
+        removeButton.setAttribute("aria-label", "Eliminar función");
+        removeButton.textContent = "×";
+        row.append(colorInput, input, removeButton);
+        expressions.append(row);
+        input.addEventListener("input", scheduleGraph);
+        colorInput.addEventListener("input", scheduleGraph);
+        removeButton.addEventListener("click", () => {
+          row.remove();
+          scheduleGraph();
+        });
+      }
+
+      function getGraphView() {
+        const values = axisInputs.map((input) =>
+          input.value.trim() === "" ? Number.NaN : Number(input.value)
+        );
+        if (values.some((value) => !Number.isFinite(value))) {
+          throw new Error("Los límites de los ejes deben ser números válidos.");
+        }
+        const [xMin, xMax, yMin, yMax] = values;
+        if (xMin >= xMax || yMin >= yMax) {
+          throw new Error("El mínimo de cada eje debe ser menor que su máximo.");
+        }
+        if (Math.max(Math.abs(xMin), Math.abs(xMax), Math.abs(yMin), Math.abs(yMax)) > 1e9) {
+          throw new Error("Usa límites de ejes menores a 1,000,000,000.");
+        }
+        return { xMin, xMax, yMin, yMax };
+      }
+
+      function niceGridStep(span, pixels) {
+        const target = span / Math.max(2, pixels / 75);
+        const power = 10 ** Math.floor(Math.log10(target));
+        const fraction = target / power;
+        const niceFraction = fraction < 1.5 ? 1 : fraction < 3.5 ? 2 : fraction < 7.5 ? 5 : 10;
+        return niceFraction * power;
+      }
+
+      function syncGraphParameters() {
+        const reservedNames = new Set([
+          "x", "y", "pi", "e", "sin", "cos", "tan", "asin", "acos", "atan",
+          "sqrt", "abs", "ln", "log", "exp", "floor", "ceil", "round",
+          "min", "max", "pow",
+        ]);
+        const names = new Set();
+        expressions.querySelectorAll(".graph-expression").forEach((input) => {
+          for (const name of input.value.match(/[A-Za-z]+/g) || []) {
+            const normalizedName = name.toLowerCase();
+            if (!reservedNames.has(normalizedName)) names.add(normalizedName);
+          }
+        });
+
+        const currentNames = [...parametersPanel.querySelectorAll(".graph-parameter-row")]
+          .map((row) => row.dataset.parameter);
+        const nextNames = [...names].sort();
+        if (currentNames.join(",") === nextNames.join(",")) return;
+
+        Object.keys(parameterValues).forEach((name) => {
+          if (!names.has(name)) delete parameterValues[name];
+        });
+        parametersPanel.replaceChildren();
+        nextNames.forEach((name) => {
+          if (!Object.hasOwn(parameterValues, name)) parameterValues[name] = 1;
+          const row = document.createElement("label");
+          row.className = "graph-parameter-row";
+          row.dataset.parameter = name;
+          const label = document.createElement("span");
+          label.textContent = name;
+          const slider = document.createElement("input");
+          slider.type = "range";
+          slider.min = "-10";
+          slider.max = "10";
+          slider.step = "0.1";
+          slider.value = String(parameterValues[name]);
+          slider.setAttribute("aria-label", `Ajustar parámetro ${name}`);
+          const valueInput = document.createElement("input");
+          valueInput.type = "number";
+          valueInput.step = "any";
+          valueInput.value = String(parameterValues[name]);
+          valueInput.setAttribute("aria-label", `Valor del parámetro ${name}`);
+          slider.addEventListener("input", () => {
+            parameterValues[name] = Number(slider.value);
+            valueInput.value = slider.value;
+            scheduleGraph();
+          });
+          valueInput.addEventListener("input", () => {
+            if (valueInput.value.trim() === "") return;
+            const value = Number(valueInput.value);
+            if (!Number.isFinite(value)) return;
+            parameterValues[name] = value;
+            slider.value = String(Math.max(-10, Math.min(10, value)));
+            scheduleGraph();
+          });
+          row.append(label, slider, valueInput);
+          parametersPanel.append(row);
+        });
+      }
+
+      function drawGraph() {
+        const bounds = canvas.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) return;
+        syncGraphParameters();
+        const pixelRatio = window.devicePixelRatio || 1;
+        canvas.width = Math.round(bounds.width * pixelRatio);
+        canvas.height = Math.round(bounds.height * pixelRatio);
+        context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        const width = bounds.width;
+        const height = bounds.height;
+        const { xMin, xMax, yMin, yMax } = view;
+        context.clearRect(0, 0, width, height);
+        context.fillStyle = "#080b10";
+        context.fillRect(0, 0, width, height);
+
+        const xToPixel = (x) => ((x - xMin) / (xMax - xMin)) * width;
+        const yToPixel = (y) => height - ((y - yMin) / (yMax - yMin)) * height;
+        const xStep = niceGridStep(xMax - xMin, width);
+        const yStep = niceGridStep(yMax - yMin, height);
+        context.font = "11px Segoe UI, sans-serif";
+        context.lineWidth = 1;
+        context.strokeStyle = "rgba(165, 176, 191, .12)";
+        context.fillStyle = "#8794a3";
+
+        for (let x = Math.ceil(xMin / xStep) * xStep; x <= xMax; x += xStep) {
+          const px = xToPixel(x);
+          context.beginPath();
+          context.moveTo(px, 0);
+          context.lineTo(px, height);
+          context.stroke();
+          if (Math.abs(x) > xStep * 1e-6) {
+            context.fillText(Number(x.toPrecision(4)).toString(), px + 3, Math.max(12, Math.min(height - 4, yToPixel(0) + 14)));
+          }
+        }
+
+        for (let y = Math.ceil(yMin / yStep) * yStep; y <= yMax; y += yStep) {
+          const py = yToPixel(y);
+          context.beginPath();
+          context.moveTo(0, py);
+          context.lineTo(width, py);
+          context.stroke();
+          if (Math.abs(y) > yStep * 1e-6) {
+            context.fillText(Number(y.toPrecision(4)).toString(), Math.max(3, Math.min(width - 30, xToPixel(0) + 5)), py - 3);
+          }
+        }
+
+        context.strokeStyle = "rgba(242, 246, 251, .72)";
+        context.lineWidth = 1.5;
+        if (xMin <= 0 && xMax >= 0) {
+          context.beginPath();
+          context.moveTo(xToPixel(0), 0);
+          context.lineTo(xToPixel(0), height);
+          context.stroke();
+        }
+        if (yMin <= 0 && yMax >= 0) {
+          context.beginPath();
+          context.moveTo(0, yToPixel(0));
+          context.lineTo(width, yToPixel(0));
+          context.stroke();
+        }
+
+        let hasInvalidFunction = false;
+        let hasExpression = false;
+        expressions.querySelectorAll(".graph-expression-row").forEach((row) => {
+          const expression = row.querySelector(".graph-expression").value.trim();
+          if (!expression) return;
+          hasExpression = true;
+          let evaluate;
+          try {
+            evaluate = compileGraphExpression(expression, parameterValues);
+          } catch (error) {
+            hasInvalidFunction = true;
+            setGraphStatus(error.message, "error");
+            return;
+          }
+
+          context.beginPath();
+          context.strokeStyle = row.querySelector(".graph-color").value;
+          context.lineWidth = 2.4;
+          let isPathStarted = false;
+          const samples = Math.ceil(width * 1.5);
+          for (let sample = 0; sample <= samples; sample += 1) {
+            const x = xMin + (sample / samples) * (xMax - xMin);
+            const y = evaluate(x);
+            const py = yToPixel(y);
+            if (!Number.isFinite(y) || !Number.isFinite(py) || py < -height * 3 || py > height * 4) {
+              isPathStarted = false;
+              continue;
+            }
+            const px = xToPixel(x);
+            if (isPathStarted) context.lineTo(px, py);
+            else {
+              context.moveTo(px, py);
+              isPathStarted = true;
+            }
+          }
+          context.stroke();
+        });
+
+        if (!hasInvalidFunction && hasExpression) {
+          graphIsValid = true;
+          graphSendButton.disabled = false;
+          setGraphStatus("Mantén presionado el clic y arrastra para desplazarte. Usa la rueda o los botones de zoom para cambiar la escala.", "success");
+        } else {
+          graphIsValid = false;
+          graphSendButton.disabled = true;
+          if (!hasInvalidFunction) setGraphStatus("Agrega una función para comenzar a graficar.");
+        }
+      }
+
+      function renderGraph() {
+        try {
+          view = getGraphView();
+          drawGraph();
+        } catch (error) {
+          graphIsValid = false;
+          graphSendButton.disabled = true;
+          setGraphStatus(error.message, "error");
+        }
+      }
+
+      function scheduleGraph() {
+        cancelAnimationFrame(graphFrame);
+        graphFrame = requestAnimationFrame(renderGraph);
+      }
+
+      function syncRangeInputs() {
+        [view.xMin, view.xMax, view.yMin, view.yMax].forEach((value, index) => {
+          axisInputs[index].value = Number(value.toPrecision(7)).toString();
+        });
+      }
+
+      addGraphExpression("x^2", "#16b8ff");
+      addGraphExpression("x", "#fc69bd");
+      tool.querySelector("#graph-add").addEventListener("click", () => {
+        addGraphExpression("", "#cbff83");
+        expressions.lastElementChild.querySelector(".graph-expression").focus();
+      });
+      axisInputs.forEach((input) => input.addEventListener("input", renderGraph));
+
+      tool.querySelector("#graph-zoom-in").addEventListener("click", () => {
+        const centerX = (view.xMin + view.xMax) / 2;
+        const centerY = (view.yMin + view.yMax) / 2;
+        const halfWidth = (view.xMax - view.xMin) * 0.4;
+        const halfHeight = (view.yMax - view.yMin) * 0.4;
+        view = { xMin: centerX - halfWidth, xMax: centerX + halfWidth, yMin: centerY - halfHeight, yMax: centerY + halfHeight };
+        syncRangeInputs();
+        renderGraph();
+      });
+      tool.querySelector("#graph-zoom-out").addEventListener("click", () => {
+        const centerX = (view.xMin + view.xMax) / 2;
+        const centerY = (view.yMin + view.yMax) / 2;
+        const halfWidth = (view.xMax - view.xMin) * 0.625;
+        const halfHeight = (view.yMax - view.yMin) * 0.625;
+        view = { xMin: centerX - halfWidth, xMax: centerX + halfWidth, yMin: centerY - halfHeight, yMax: centerY + halfHeight };
+        syncRangeInputs();
+        renderGraph();
+      });
+      tool.querySelector("#graph-reset").addEventListener("click", () => {
+        view = { ...defaultView };
+        syncRangeInputs();
+        renderGraph();
+      });
+
+      canvas.addEventListener("pointerdown", (event) => {
+        if (!event.isPrimary || event.button !== 0) return;
+        event.preventDefault();
+        const bounds = canvas.getBoundingClientRect();
+        dragState = { x: event.clientX, y: event.clientY, width: bounds.width, height: bounds.height };
+        canvas.setPointerCapture(event.pointerId);
+        canvas.classList.add("dragging");
+      });
+      canvas.addEventListener("pointermove", (event) => {
+        if (!dragState) return;
+        const deltaX = (event.clientX - dragState.x) / dragState.width * (view.xMax - view.xMin);
+        const deltaY = (event.clientY - dragState.y) / dragState.height * (view.yMax - view.yMin);
+        view = {
+          xMin: view.xMin - deltaX, xMax: view.xMax - deltaX,
+          yMin: view.yMin + deltaY, yMax: view.yMax + deltaY,
+        };
+        dragState = { ...dragState, x: event.clientX, y: event.clientY };
+        syncRangeInputs();
+        scheduleGraph();
+      });
+      function stopGraphDrag() {
+        dragState = null;
+        canvas.classList.remove("dragging");
+      }
+
+      canvas.addEventListener("pointerup", stopGraphDrag);
+      canvas.addEventListener("pointercancel", stopGraphDrag);
+      canvas.addEventListener("lostpointercapture", stopGraphDrag);
+      canvas.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        const bounds = canvas.getBoundingClientRect();
+        const anchorX = view.xMin + ((event.clientX - bounds.left) / bounds.width) * (view.xMax - view.xMin);
+        const anchorY = view.yMax - ((event.clientY - bounds.top) / bounds.height) * (view.yMax - view.yMin);
+        const factor = event.deltaY < 0 ? 0.85 : 1.18;
+        view = {
+          xMin: anchorX - (anchorX - view.xMin) * factor,
+          xMax: anchorX + (view.xMax - anchorX) * factor,
+          yMin: anchorY - (anchorY - view.yMin) * factor,
+          yMax: anchorY + (view.yMax - anchorY) * factor,
+        };
+        syncRangeInputs();
+        scheduleGraph();
+      }, { passive: false });
+
+      tool.querySelector("#graph-send").addEventListener("click", () => {
+        if (!graphIsValid) {
+          setGraphStatus("Corrige las funciones o los rangos antes de consultar a la IA.", "error");
+          return;
+        }
+        const functionsText = [...expressions.querySelectorAll(".graph-expression-row")]
+          .map((row, index) => `f${index + 1}(x) = ${row.querySelector(".graph-expression").value.trim().replace(/^\s*y\s*=\s*/i, "")}`)
+          .filter((expression) => !expression.endsWith("= "))
+          .join("; ");
+        if (!functionsText) {
+          setGraphStatus("Agrega al menos una función antes de consultar a la IA.", "error");
+          return;
+        }
+        const parametersText = Object.keys(parameterValues)
+          .sort()
+          .map((name) => `${name} = ${parameterValues[name]}`)
+          .join(", ");
+        sendChatMessage(
+          `En Cálculo Diferencial, analiza estas funciones: ${functionsText}.${parametersText ? ` Los parámetros son ${parametersText}.` : ""} La ventana de la gráfica es x entre ${view.xMin} y ${view.xMax}, e y entre ${view.yMin} y ${view.yMax}. Ayúdame a interpretar sus gráficas y a calcular sus derivadas.`,
+          {
+            preserveInput: true,
+            countsAsStudyProblem: true,
+            learningModuleId: findModuleForTopic("cálculo diferencial")?.id || null,
+          }
+        );
+      });
+
+      const resizeObserver = new ResizeObserver(scheduleGraph);
+      resizeObserver.observe(canvas);
+      renderGraph();
+      scrollConversationToBottom();
+    }
+
+    function openPythagorasTool() {
+      welcome.hidden = true;
+      conversation.classList.add("visible");
+      removeOtherAssistantTools();
+
+      const tool = document.createElement("section");
+      tool.className = "message assistant geometry-tool";
+      tool.setAttribute("aria-labelledby", "geometry-title");
+      tool.innerHTML = `
+        <h2 class="geometry-title" id="geometry-title">Teorema de Pitágoras</h2>
+        <p class="geometry-help">Ingresa dos lados para calcular el tercero. CO: cateto opuesto; CA: cateto adyacente; HIP: hipotenusa.</p>
+        <div class="geometry-fields">
+          <label class="geometry-field" for="geometry-co">CO
+            <input id="geometry-co" type="number" min="0" step="any" inputmode="decimal" placeholder="Valor">
+          </label>
+          <label class="geometry-field" for="geometry-ca">CA
+            <input id="geometry-ca" type="number" min="0" step="any" inputmode="decimal" placeholder="Valor">
+          </label>
+          <label class="geometry-field" for="geometry-hip">HIP
+            <input id="geometry-hip" type="number" min="0" step="any" inputmode="decimal" placeholder="Valor">
+          </label>
+        </div>
+        <figure class="geometry-figure">
+          <svg class="geometry-svg" viewBox="0 0 320 220" role="img" aria-label="Triángulo rectángulo con cateto opuesto, cateto adyacente e hipotenusa">
+            <g class="triangle-shape">
+              <path class="triangle-fill" d="M65 175 L65 35 L265 175 Z"></path>
+              <path class="triangle-angle" d="M65 157 L83 157 L83 175"></path>
+              <text class="triangle-label" x="30" y="112">CO</text>
+              <text class="triangle-label" x="150" y="199">CA</text>
+              <text class="triangle-label" x="180" y="94" transform="rotate(35 180 94)">HIP</text>
+            </g>
+          </svg>
+          <figcaption class="rotation-controls">
+            <span>Rotar</span>
+            <input id="geometry-rotation" type="range" min="0" max="360" value="0" aria-label="Rotar el triángulo">
+            <button class="rotate-button" id="geometry-rotate" type="button" aria-label="Girar triángulo 90 grados">↻ 90°</button>
+          </figcaption>
+        </figure>
+        <div class="geometry-actions">
+          <button class="geometry-calculate" id="geometry-calculate" type="button">Calcular / verificar</button>
+          <button class="geometry-send" id="geometry-send" type="button" disabled>Enviar ejercicio a la IA</button>
+          <p class="geometry-status" id="geometry-status" role="status" aria-live="polite">Completa dos lados y calcula el tercero.</p>
+        </div>
+      `;
+      addToolCloseButton(tool);
+      conversation.append(tool);
+
+      const sideInputs = ["co", "ca", "hip"].map((side) =>
+        tool.querySelector(`#geometry-${side}`)
+      );
+      const status = tool.querySelector("#geometry-status");
+      const sendButton = tool.querySelector("#geometry-send");
+      const triangle = tool.querySelector(".triangle-shape");
+      const rotationInput = tool.querySelector("#geometry-rotation");
+      let isCalculationValid = false;
+
+      function setStatus(message, state) {
+        status.textContent = message;
+        status.dataset.state = state;
+      }
+
+      function calculateSides() {
+        const values = sideInputs.map((input) =>
+          input.value.trim() === "" ? null : Number(input.value)
+        );
+        if (values.some((value) => value !== null && (!Number.isFinite(value) || value <= 0))) {
+          setStatus("Cada lado debe ser un número mayor que cero.", "error");
+          return false;
+        }
+
+        const knownCount = values.filter((value) => value !== null).length;
+        if (knownCount < 2) {
+          setStatus("Ingresa dos lados para calcular el que falta.", "error");
+          return false;
+        }
+
+        if (knownCount === 2) {
+          const missingIndex = values.findIndex((value) => value === null);
+          let missingValue;
+          if (missingIndex === 2) {
+            missingValue = Math.hypot(values[0], values[1]);
+          } else {
+            const leg = values[missingIndex === 0 ? 1 : 0];
+            const hypotenuse = values[2];
+            if (hypotenuse <= leg) {
+              setStatus("La hipotenusa debe ser mayor que cualquiera de los catetos.", "error");
+              return false;
+            }
+            missingValue = Math.sqrt(hypotenuse ** 2 - leg ** 2);
+          }
+          sideInputs[missingIndex].value = Number(missingValue.toPrecision(8)).toString();
+          values[missingIndex] = missingValue;
+        }
+
+        const [co, ca, hip] = values;
+        const expectedHypotenuse = Math.hypot(co, ca);
+        const tolerance = Math.max(1e-6, hip * 1e-4);
+        if (Math.abs(expectedHypotenuse - hip) > tolerance) {
+          setStatus("Los valores no cumplen CO² + CA² = HIP². Revisa los lados.", "error");
+          return false;
+        }
+
+        setStatus("Los lados cumplen el teorema de Pitágoras. Ya puedes enviar el ejercicio a la IA.", "success");
+        return true;
+      }
+
+      tool.querySelector("#geometry-calculate").addEventListener("click", () => {
+        isCalculationValid = calculateSides();
+        sendButton.disabled = !isCalculationValid;
+      });
+
+      sideInputs.forEach((input) => {
+        input.addEventListener("input", () => {
+          isCalculationValid = false;
+          sendButton.disabled = true;
+          setStatus("Completa dos lados y calcula o verifica los valores.", "");
+        });
+      });
+
+      function setRotation(degrees) {
+        rotationInput.value = String(degrees);
+        triangle.style.transform = `rotate(${degrees}deg)`;
+      }
+
+      rotationInput.addEventListener("input", () => setRotation(Number(rotationInput.value)));
+      tool.querySelector("#geometry-rotate").addEventListener("click", () => {
+        setRotation((Number(rotationInput.value) + 90) % 360);
+      });
+
+      sendButton.addEventListener("click", () => {
+        if (!isCalculationValid) return;
+        const [co, ca, hip] = sideInputs.map((input) => input.value);
+        sendButton.disabled = true;
+        sendChatMessage(
+          `En la materia Trigonometría, ayúdame a resolver y explicar paso a paso el Teorema de Pitágoras para un triángulo rectángulo. Los valores son: CO (cateto opuesto) = ${co}, CA (cateto adyacente) = ${ca}, HIP (hipotenusa) = ${hip}. Verifica que CO² + CA² = HIP² y explica el procedimiento.`,
+          {
+            countsAsStudyProblem: true,
+            learningModuleId: findModuleForTopic("trigonometría")?.id || null,
+          }
+        );
+      });
+
+      scrollConversationToBottom();
+      sideInputs[0].focus();
+    }
+
+    function saveModules() {
+      try {
+        localStorage.setItem(modulesStorageKey, JSON.stringify(modules));
+        moduleStatus.textContent = "Cambios guardados en este navegador.";
+      } catch (error) {
+        console.error("No se pudieron guardar los módulos:", error);
+        moduleStatus.textContent = "No se pudieron guardar los cambios en este navegador.";
+      }
+      renderLearningProgress();
+    }
+
+    function renderModules(expandId = expandedModuleId) {
+      moduleList.replaceChildren();
+      expandedModuleId = modules.some((module) => module.id === expandId) ? expandId : null;
+      if (modules.length === 0) {
+        const emptyMessage = document.createElement("p");
+        emptyMessage.className = "empty-problems";
+        emptyMessage.textContent = "Todavía no hay materias. Agrega una para empezar.";
+        moduleList.append(emptyMessage);
+        return;
+      }
+
+      modules.forEach((module) => {
+        const card = document.createElement("article");
+        card.className = "module-card";
+
+        const heading = document.createElement("div");
+        heading.className = "module-heading";
+        const expandButton = document.createElement("button");
+        expandButton.className = "module-expand";
+        expandButton.type = "button";
+        expandButton.dataset.action = "toggle";
+        expandButton.dataset.moduleId = module.id;
+        expandButton.setAttribute("aria-expanded", "false");
+        const chevron = document.createElement("span");
+        chevron.className = "module-chevron";
+        chevron.setAttribute("aria-hidden", "true");
+        chevron.textContent = "›";
+        const name = document.createElement("span");
+        name.textContent = module.name;
+        expandButton.append(chevron, name);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "module-delete";
+        deleteButton.type = "button";
+        deleteButton.dataset.action = "delete";
+        deleteButton.dataset.moduleId = module.id;
+        deleteButton.setAttribute("aria-label", `Eliminar materia ${module.name}`);
+        deleteButton.title = "Eliminar materia";
+        deleteButton.textContent = "×";
+        heading.append(expandButton, deleteButton);
+
+        const content = document.createElement("div");
+        content.className = "module-content";
+        const inner = document.createElement("div");
+        inner.className = "module-content-inner";
+        const problems = document.createElement("div");
+        problems.className = "problem-list";
+        problems.setAttribute("aria-label", `Problemas de ${module.name}`);
+
+        if (module.problems.length === 0) {
+          const emptyMessage = document.createElement("p");
+          emptyMessage.className = "empty-problems";
+          emptyMessage.textContent = "Todavía no hay problemas.";
+          problems.append(emptyMessage);
+        } else {
+          module.problems.forEach((problem, problemIndex) => {
+            const button = document.createElement("button");
+            const isGeneratedProblem = problem === module.generatedProblem;
+            button.className = isGeneratedProblem ? "problem-item generated-problem" : "problem-item";
+            button.type = "button";
+            button.dataset.action = "select-problem";
+            button.dataset.moduleId = module.id;
+            button.dataset.problemIndex = String(problemIndex);
+            if (isGeneratedProblem) {
+              button.setAttribute("aria-label", `Problema cotidiano generado por IA: ${problem}`);
+            }
+            button.textContent = problem;
+            problems.append(button);
+          });
+        }
+
+        const problemForm = document.createElement("form");
+        problemForm.className = "problem-form";
+        problemForm.dataset.moduleId = module.id;
+        const input = document.createElement("input");
+        input.className = "module-input";
+        input.type = "text";
+        input.maxLength = 300;
+        input.placeholder = "Agregar problema";
+        input.setAttribute("aria-label", `Agregar problema a ${module.name}`);
+        input.required = true;
+        const addButton = document.createElement("button");
+        addButton.className = "module-add";
+        addButton.type = "submit";
+        addButton.setAttribute("aria-label", `Agregar problema a ${module.name}`);
+        addButton.title = "Agregar problema";
+        addButton.textContent = "+";
+        problemForm.append(input, addButton);
+        inner.append(problems, problemForm);
+        content.append(inner);
+        card.append(heading, content);
+        moduleList.append(card);
+      });
+
+      moduleList.querySelectorAll(".module-card").forEach((card, index) => {
+        card.querySelector(".module-content").setAttribute("aria-hidden", "true");
+        card.querySelector(".module-content").inert = true;
+        card.querySelector(".module-expand").setAttribute("aria-controls", `problems-${modules[index].id}`);
+        card.querySelector(".module-content").id = `problems-${modules[index].id}`;
+      });
+
+      if (expandedModuleId) {
+        const targetId = expandedModuleId;
+        requestAnimationFrame(() => {
+          if (expandedModuleId === targetId) setExpandedModule(targetId);
+        });
+      }
+    }
+
+    function setExpandedModule(moduleId) {
+      expandedModuleId = modules.some((module) => module.id === moduleId) ? moduleId : null;
+      if (expandedModuleId) progressDisplayModuleId = expandedModuleId;
+      renderLearningProgress();
+      moduleList.querySelectorAll(".module-card").forEach((card) => {
+        const isExpanded = card.querySelector(".module-expand").dataset.moduleId === expandedModuleId;
+        card.classList.toggle("expanded", isExpanded);
+        card.querySelector(".module-expand").setAttribute("aria-expanded", String(isExpanded));
+        card.querySelector(".module-content").setAttribute("aria-hidden", String(!isExpanded));
+        card.querySelector(".module-content").inert = !isExpanded;
+      });
+    }
+
+    async function selectOrGenerateDailyProblem(module) {
+      if (module.generatedProblem) {
+        selectModuleProblem(module, module.generatedProblem);
+        return;
+      }
+      if (dailyProblemRequests.has(module.id)) return;
+
+      dailyProblemRequests.add(module.id);
+      const selectedModuleId = expandedModuleId;
+      moduleStatus.textContent = `Generando un problema cotidiano de ${module.name} con IA...`;
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [{
+              role: "user",
+              text: `Genera un solo problema cotidiano y breve para estudiar ${module.name}, situado en el contexto de una escuela técnica como la ETRR. Prefiere una situación plausible de talleres (mecánica, electricidad, automatización, fabricación o metrología, según corresponda a la materia). No afirmes que la situación ocurrió realmente en la ETRR: debe ser un caso hipotético pero realista. Incluye los datos necesarios y formula el objetivo como una consigna directa, sin signos de interrogación, que se pueda resolver aplicando ${module.name}. No incluyas la solución, introducciones ni una lista; responde únicamente con el enunciado del problema, en español y en menos de 500 caracteres.`,
+            }],
+          }),
+        });
+        const data = await readApiResponse(response);
+        const problem = typeof data.reply === "string" ? data.reply.trim() : "";
+        if (!problem) throw new Error("La IA no devolvió un enunciado válido.");
+        if (problem.length > 500) throw new Error("La IA generó un enunciado demasiado largo. Inténtalo otra vez.");
+        if (!modules.includes(module)) return;
+
+        module.generatedProblem = problem;
+        module.problems.unshift(problem);
+        saveModules();
+        renderModules(expandedModuleId);
+        if (selectedModuleId === module.id && expandedModuleId === module.id) {
+          selectModuleProblem(module, problem);
+        }
+      } catch (error) {
+        console.error("No se pudo generar un problema cotidiano:", error);
+        moduleStatus.textContent = `No se pudo generar el problema de ${module.name}. Puedes volver a seleccionar la materia para intentarlo otra vez.`;
+      } finally {
+        dailyProblemRequests.delete(module.id);
+      }
+    }
+
+    function selectModuleProblem(module, problem) {
+      promptInput.value = `En la materia ${module.name}, ayúdame a resolver paso a paso este problema cotidiano en el contexto de la ETRR:\n${problem}`;
+      pendingStudyProblem = problem;
+      pendingStudyModuleId = module.id;
+      progressDisplayModuleId = module.id;
+      renderLearningProgress();
+      promptInput.focus();
+      moduleStatus.textContent = "Problema cotidiano seleccionado y listo para enviar desde el chat.";
+    }
+
+    moduleList.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const selectedModule = modules.find((module) => module.id === button.dataset.moduleId);
+      if (!selectedModule) return;
+
+      if (button.dataset.action === "toggle") {
+        progressDisplayModuleId = selectedModule.id;
+        renderLearningProgress();
+        if (
+          normalizeText(selectedModule.name).includes("calculo") &&
+          normalizeText(selectedModule.name).includes("diferencial")
+        ) {
+          setExpandedModule(selectedModule.id);
+          void selectOrGenerateDailyProblem(selectedModule);
+          openGraphTool();
+          setSidebarOpen(false);
+          return;
+        }
+        const isOpening = expandedModuleId !== selectedModule.id;
+        setExpandedModule(isOpening ? selectedModule.id : null);
+        if (isOpening) void selectOrGenerateDailyProblem(selectedModule);
+      } else if (button.dataset.action === "delete") {
+        if (!window.confirm(`¿Eliminar la materia "${selectedModule.name}" y todos sus problemas?`)) return;
+        modules = modules.filter((module) => module.id !== selectedModule.id);
+        delete learningProgress[selectedModule.id];
+        saveLearningProgress();
+        if (progressDisplayModuleId === selectedModule.id) {
+          progressDisplayModuleId = modules[0]?.id || null;
+        }
+        saveModules();
+        renderModules();
+      } else if (button.dataset.action === "select-problem") {
+        const problem = selectedModule.problems[Number(button.dataset.problemIndex)];
+        if (typeof problem !== "string") return;
+        if (
+          normalizeText(selectedModule.name).includes("trigonometr") &&
+          normalizeText(problem).includes("pitagoras")
+        ) {
+          pendingStudyProblem = problem;
+          pendingStudyModuleId = selectedModule.id;
+          progressDisplayModuleId = selectedModule.id;
+          renderLearningProgress();
+          openPythagorasTool();
+          setSidebarOpen(false);
+          return;
+        }
+        selectModuleProblem(selectedModule, problem);
+        setSidebarOpen(false);
+      }
+    });
+
+    moduleList.addEventListener("submit", (event) => {
+      if (!event.target.matches(".problem-form")) return;
+      event.preventDefault();
+      const selectedModule = modules.find((module) => module.id === event.target.dataset.moduleId);
+      const input = event.target.querySelector("input");
+      const problem = input.value.trim();
+      if (!problem || !selectedModule) return;
+      selectedModule.problems.push(problem);
+      saveModules();
+      renderModules(selectedModule.id);
+      requestAnimationFrame(() => {
+        const problemInput = moduleList.querySelector(".module-card.expanded .problem-form input");
+        if (problemInput) problemInput.focus();
+      });
+    });
+
+    document.querySelector("#module-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const nameInput = document.querySelector("#module-name");
+      const name = nameInput.value.trim();
+      if (!name) return;
+      if (modules.some((module) => module.name.toLowerCase() === name.toLowerCase())) {
+        moduleStatus.textContent = "Ya existe una materia con ese nombre.";
+        return;
+      }
+      const module = { id: `module-${Date.now()}`, name, problems: [] };
+      modules.push(module);
+      saveModules();
+      nameInput.value = "";
+      renderModules(module.id);
+    });
+
+    function scrollConversationToBottom() {
+      requestAnimationFrame(() => {
+        conversation.scrollTo({
+          top: conversation.scrollHeight,
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        });
+      });
+    }
+
+    function addMessage(text, role) {
+      const message = document.createElement("div");
+      message.className = `message ${role}`;
+      if (role === "assistant") {
+        renderAssistantText(message, text);
+      } else {
+        message.textContent = text;
+      }
+      conversation.append(message);
+      scrollConversationToBottom();
+      return message;
+    }
+
+    function stopSpeechPlayback() {
+      if (currentSpeechController) currentSpeechController.abort();
+      if (currentSpeechAudio) {
+        currentSpeechAudio.pause();
+        currentSpeechAudio.removeAttribute("src");
+        currentSpeechAudio.load();
+      }
+      if (currentSpeechUrl) URL.revokeObjectURL(currentSpeechUrl);
+      if (currentSpeechButton) {
+        currentSpeechButton.disabled = false;
+        currentSpeechButton.textContent = "Escuchar";
+      }
+      currentSpeechAudio = null;
+      currentSpeechUrl = "";
+      currentSpeechButton = null;
+      currentSpeechController = null;
+    }
+
+    function addSpeechControl(message) {
+      if (message.querySelector(".assistant-speech-button")) return;
+      const readableMessage = message.cloneNode(true);
+      readableMessage.querySelectorAll(".assistant-speech-button, .assistant-speech-status").forEach((element) => element.remove());
+      const text = (readableMessage.innerText || readableMessage.textContent || "").trim();
+      if (!text) return;
+
+      const button = document.createElement("button");
+      button.className = "assistant-speech-button";
+      button.type = "button";
+      button.textContent = "Escuchar";
+      button.setAttribute("aria-label", "Escuchar esta respuesta; audio generado con inteligencia artificial");
+      const status = document.createElement("p");
+      status.className = "assistant-speech-status";
+      status.setAttribute("role", "status");
+      message.append(button, status);
+
+      if (text.length > 5000) {
+        button.disabled = true;
+        status.textContent = "Esta respuesta supera el límite de 5000 caracteres para generar audio.";
+        return;
+      }
+
+      button.addEventListener("click", async () => {
+        status.textContent = "";
+        if (currentSpeechButton === button && currentSpeechAudio && !currentSpeechAudio.ended) {
+          if (currentSpeechAudio.paused) {
+            try {
+              await currentSpeechAudio.play();
+              button.textContent = "Pausar";
+            } catch {
+              status.textContent = "No se pudo reanudar el audio.";
+            }
+          } else {
+            currentSpeechAudio.pause();
+            button.textContent = "Reanudar";
+          }
+          return;
+        }
+
+        stopSpeechPlayback();
+        currentSpeechButton = button;
+        const controller = new AbortController();
+        currentSpeechController = controller;
+        button.disabled = true;
+        button.textContent = "Generando audio...";
+        try {
+          const response = await fetch("/api/speech", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+            signal: controller.signal,
+          });
+          if (!button.isConnected || currentSpeechButton !== button) return;
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || "No se pudo generar el audio.");
+          }
+
+          currentSpeechUrl = URL.createObjectURL(await response.blob());
+          if (!button.isConnected || currentSpeechButton !== button) {
+            URL.revokeObjectURL(currentSpeechUrl);
+            currentSpeechUrl = "";
+            return;
+          }
+          currentSpeechAudio = new Audio(currentSpeechUrl);
+          currentSpeechAudio.addEventListener("ended", () => {
+            button.textContent = "Escuchar";
+            button.disabled = false;
+          });
+          await currentSpeechAudio.play();
+          button.disabled = false;
+          button.textContent = "Pausar";
+        } catch (error) {
+          if (currentSpeechButton === button) {
+            stopSpeechPlayback();
+            if (button.isConnected) status.textContent = error.message || "No se pudo generar el audio.";
+          }
+        }
+      });
+    }
+
+    function formatMathText(text) {
+      return text
+        .replace(/\\(?:left|right|displaystyle|textstyle)\b/g, "")
+        .replace(/\\times\b/g, "×")
+        .replace(/\\cdot\b/g, "·")
+        .replace(/\\div\b/g, "÷")
+        .replace(/\\pm\b/g, "±")
+        .replace(/\\(?:geq|ge)\b/g, "≥")
+        .replace(/\\geqslant\b/g, "≥")
+        .replace(/\\(?:leq|le)\b/g, "≤")
+        .replace(/\\leqslant\b/g, "≤")
+        .replace(/\\neq\b/g, "≠")
+        .replace(/\\approx\b/g, "≈")
+        .replace(/\\(?:land|wedge)\b/g, " y ")
+        .replace(/\\(?:lor|vee)\b/g, " o ")
+        .replace(/\\in\b/g, "∈")
+        .replace(/\\notin\b/g, "∉")
+        .replace(/\\infty\b/g, "∞")
+        .replace(/\\pi\b/g, "π")
+        .replace(/\\quad\b/g, " ")
+        .replace(/\\qquad\b/g, " ")
+        .replace(/\\[,;:!]\s*/g, " ")
+        .replace(/\\begin\{(?:cases|aligned|array|matrix|pmatrix|bmatrix)\}(?:\{[^{}]*\})?/g, "")
+        .replace(/\\end\{(?:cases|aligned|array|matrix|pmatrix|bmatrix)\}/g, "")
+        .replace(/\\\\/g, "\n")
+        .replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, "($1)/($2)")
+        .replace(/\\sqrt\{([^{}]*)\}/g, "√($1)")
+        .replace(/\\text\{([^{}]*)\}/g, "$1")
+        .replace(/\\[a-zA-Z]+/g, "")
+        .replace(/[ \t]{2,}/g, " ")
+        .replace(/[{}]/g, "");
+    }
+
+    function appendAssistantInline(parent, text) {
+      const tokenPattern = /(\*\*[^*]+\*\*|__[^_]+__|`[^`]+`|\\\([\s\S]*?\\\)|\$[^$\n]+\$)/g;
+      let lastIndex = 0;
+      for (const match of text.matchAll(tokenPattern)) {
+        parent.append(document.createTextNode(text.slice(lastIndex, match.index)));
+        const token = match[0];
+        const content = token.startsWith("$") ? token.slice(1, -1) : token.slice(2, -2);
+        const element = document.createElement(
+          token.startsWith("`") ? "code" :
+          token.startsWith("\\(") || token.startsWith("$") ? "span" : "strong"
+        );
+        if (token.startsWith("\\(") || token.startsWith("$")) {
+          element.className = "math-inline";
+          element.textContent = formatMathText(content);
+        } else {
+          element.textContent = content;
+        }
+        parent.append(element);
+        lastIndex = match.index + token.length;
+      }
+      parent.append(document.createTextNode(text.slice(lastIndex)));
+    }
+
+    function renderGuidedContent(message, promptText, optionsText) {
+      const options = optionsText.split(/\r?\n/)
+        .map((line) => line.trim().replace(/^(?:[-*]|\d+[.)])\s+/, ""))
+        .filter(Boolean);
+      appendAssistantPlainText(message, [promptText.trim(), ...options].filter(Boolean).join("\n"));
+    }
+
+    function appendAssistantPlainText(message, text) {
+      const lines = text.split(/\r?\n/);
+      let list = null;
+      let mathLines = null;
+      let codeLines = null;
+      let codeLanguage = "";
+
+      const closeList = () => {
+        list = null;
+      };
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (codeLines) {
+          if (/^```\s*$/.test(trimmed)) {
+            const pre = document.createElement("pre");
+            const code = document.createElement("code");
+            if (codeLanguage) {
+              const language = document.createElement("span");
+              language.className = "code-language";
+              language.textContent = codeLanguage;
+              pre.append(language);
+            }
+            code.textContent = codeLines.join("\n");
+            pre.append(code);
+            message.append(pre);
+            codeLines = null;
+            codeLanguage = "";
+          } else {
+            codeLines.push(line);
+          }
+          continue;
+        }
+        const codeFence = trimmed.match(/^```([a-zA-Z0-9_+#.-]*)\s*$/);
+        if (codeFence) {
+          closeList();
+          codeLines = [];
+          codeLanguage = codeFence[1];
+          continue;
+        }
+        if (mathLines) {
+          if (/^\\\]\s*$/.test(trimmed)) {
+            const equation = document.createElement("div");
+            equation.className = "math-block";
+            equation.textContent = formatMathText(mathLines.join("\n"));
+            message.append(equation);
+            mathLines = null;
+          } else {
+            mathLines.push(line);
+          }
+          continue;
+        }
+        if (/^\\\[\s*$/.test(trimmed)) {
+          closeList();
+          mathLines = [];
+          continue;
+        }
+        if (/^\\\[[\s\S]*\\\]$/.test(trimmed)) {
+          closeList();
+          const equation = document.createElement("div");
+          equation.className = "math-block";
+          equation.textContent = formatMathText(trimmed.replace(/^\\\[\s*|\s*\\\]$/g, ""));
+          message.append(equation);
+          continue;
+        }
+        if (!trimmed) {
+          closeList();
+          continue;
+        }
+
+        const listMatch = trimmed.match(/^(?:([-*])\s+|(\d+)[.)]\s+)(.*)$/);
+        if (listMatch) {
+          const listType = listMatch[2] ? "ol" : "ul";
+          if (!list || list.tagName.toLowerCase() !== listType) {
+            list = document.createElement(listType);
+            message.append(list);
+          }
+          const item = document.createElement("li");
+          appendAssistantInline(item, listMatch[3]);
+          list.append(item);
+          continue;
+        }
+
+        closeList();
+        const headingMatch = trimmed.match(/^#{1,3}\s+(.+)$/);
+        const paragraph = document.createElement(headingMatch ? "strong" : "p");
+        appendAssistantInline(paragraph, headingMatch ? headingMatch[1] : line);
+        message.append(paragraph);
+      }
+
+      if (mathLines) {
+        const equation = document.createElement("div");
+        equation.className = "math-block";
+        equation.textContent = formatMathText(mathLines.join("\n"));
+        message.append(equation);
+      }
+      if (codeLines) {
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
+        if (codeLanguage) {
+          const language = document.createElement("span");
+          language.className = "code-language";
+          language.textContent = codeLanguage;
+          pre.append(language);
+        }
+        code.textContent = codeLines.join("\n");
+        pre.append(code);
+        message.append(pre);
+      }
+    }
+
+    function renderAssistantText(message, text) {
+      message.replaceChildren();
+      const guidedQuestionPattern = /\[\[PREGUNTA_INTERACTIVA\]\]\s*([\s\S]*?)\s*\[\[OPCIONES\]\]\s*([\s\S]*?)\s*\[\[\/PREGUNTA_INTERACTIVA\]\]/g;
+      let lastIndex = 0;
+      for (const match of text.matchAll(guidedQuestionPattern)) {
+        appendAssistantPlainText(message, text.slice(lastIndex, match.index));
+        renderGuidedContent(message, match[1], match[2]);
+        lastIndex = match.index + match[0].length;
+      }
+      appendAssistantPlainText(message, text.slice(lastIndex));
+    }
+
+    function showAssistantResponse(message, text) {
+      message.classList.remove("loading", "response-arrive");
+      message.classList.add("typing");
+      const characters = Array.from(text);
+      const chunkSize = Math.max(1, Math.ceil(characters.length / 300));
+      let visibleCharacters = 0;
+
+      const typeNextChunk = () => {
+        if (!message.isConnected) return;
+        visibleCharacters = Math.min(visibleCharacters + chunkSize, characters.length);
+        renderAssistantText(message, characters.slice(0, visibleCharacters).join(""));
+        conversation.scrollTop = conversation.scrollHeight;
+
+        if (visibleCharacters < characters.length) {
+          window.setTimeout(typeNextChunk, 24);
+          return;
+        }
+
+        message.classList.remove("typing");
+        addSpeechControl(message);
+        void message.offsetWidth;
+        message.classList.add("response-arrive");
+        scrollConversationToBottom();
+      };
+
+      typeNextChunk();
+    }
+
+    function startNewChat() {
+      stopSpeechPlayback();
+      conversation.replaceChildren();
+      conversation.classList.remove("visible");
+      welcome.hidden = false;
+      clearSelectedAttachments();
+      messages.length = 0;
+      activeConversationId = null;
+      pendingStudyProblem = null;
+      pendingStudyModuleId = null;
+      promptInput.value = "";
+      renderConversationHistory();
+      promptInput.focus();
+    }
+
+    renderModules();
+    renderLearningProgress();
+    renderConversationHistory();
+    const requestedModuleId = new URLSearchParams(window.location.search).get("materia");
+    if (requestedModuleId && modules.some((module) => module.id === requestedModuleId)) {
+      setExpandedModule(requestedModuleId);
+      setSidebarOpen(true);
+      const requestedModule = modules.find((module) => module.id === requestedModuleId);
+      if (requestedModule) void selectOrGenerateDailyProblem(requestedModule);
+    }
+
+    document.querySelector("#new-chat").addEventListener("click", () => {
+      startNewChat();
+      setSidebarOpen(false);
+    });
+
+    attachFilesButton.addEventListener("click", () => attachmentInput.click());
+    attachmentInput.addEventListener("change", () => {
+      addSelectedFiles(attachmentInput.files);
+      attachmentInput.value = "";
+    });
+
+    promptInput.addEventListener("input", () => {
+      promptInput.style.height = "auto";
+      promptInput.style.height = `${Math.min(promptInput.scrollHeight, 150)}px`;
+    });
+
+    document.querySelectorAll(".suggestion").forEach((button) => {
+      button.addEventListener("click", () => {
+        promptInput.value = button.textContent;
+        promptInput.dispatchEvent(new Event("input"));
+        promptInput.focus();
+      });
+    });
+
+    async function sendChatMessage(
+      text,
+      {
+        preserveInput = false,
+        countsAsStudyProblem = false,
+        learningModuleId = null,
+        progressTest = null,
+        displayText = text,
+        attachments = [],
+      } = {}
+    ) {
+      text = text.trim();
+      if (!text && attachments.length === 0) return;
+
+      ensureActiveConversation(text);
+      welcome.hidden = true;
+      conversation.classList.add("visible");
+      const attachmentNames = attachments.map((file) => file.name);
+      const visibleText = [
+        displayText,
+        attachmentNames.length ? `📎 ${attachmentNames.join(", ")}` : "",
+      ].filter(Boolean).join("\n\n");
+      addMessage(visibleText, "user");
+      messages.push({ role: "user", text, ...(visibleText === text ? {} : { displayText: visibleText }) });
+      persistActiveConversation();
+      const requestConversationId = activeConversationId;
+      const requestMessages = messages.map((message) => ({ ...message }));
+      if (!preserveInput) promptInput.value = "";
+      const sendButton = form.querySelector('button[type="submit"]');
+      sendButton.disabled = true;
+      const assistantMessage = addMessage("BrainMach está pensando", "assistant");
+      assistantMessage.classList.add("loading");
+      let moduleTestDue = null;
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: requestMessages,
+            attachments: await prepareAttachments(attachments),
+          }),
+        });
+        const data = await readApiResponse(response);
+        if (countsAsStudyProblem) recordStudyProblem();
+
+        const savedConversation = conversations.find((item) => item.id === requestConversationId);
+        if (savedConversation) {
+          const updatedMessages = [...requestMessages, { role: "model", text: data.reply }];
+          persistConversation(requestConversationId, updatedMessages);
+          if (progressTest) {
+            completeModuleLearningTest(progressTest.moduleId, progressTest.level);
+          } else if (countsAsStudyProblem && learningModuleId) {
+            moduleTestDue = awardModuleLearningProgress(learningModuleId);
+          }
+          if (activeConversationId === requestConversationId) {
+            messages.push({ role: "model", text: data.reply });
+            showAssistantResponse(assistantMessage, data.reply);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        if (error?.moderationWarning || error?.permanentlyBanned) {
+          assistantMessage.remove();
+          const savedConversation = conversations.find((item) => item.id === requestConversationId);
+          if (savedConversation) {
+            const safeMessages = [...requestMessages];
+            if (safeMessages.at(-1)?.role === "user") safeMessages.pop();
+            persistConversation(requestConversationId, safeMessages);
+          }
+          if (activeConversationId === requestConversationId) {
+            if (messages.at(-1)?.role === "user") messages.pop();
+            const userBubbles = conversation.querySelectorAll(".message.user");
+            userBubbles.at(-1)?.remove();
+          }
+          clearSelectedAttachments();
+          if (error.permanentlyBanned) {
+            showPermanentBan(error.message);
+          } else {
+            const warningMessage = addMessage("", "assistant");
+            showAssistantResponse(warningMessage, error.message);
+          }
+        } else if (window.location.protocol === "file:") {
+          showAssistantResponse(assistantMessage, "Esta página se abrió como archivo local y no puede conectarse con la IA. Abre http://localhost:3000/asistente.html para usar el asistente.");
+        } else if (error instanceof TypeError && /fetch/i.test(error.message)) {
+          showAssistantResponse(assistantMessage, "No pude conectar con el servidor local. Comprueba que server.js esté activo y vuelve a intentarlo.");
+        } else {
+          showAssistantResponse(assistantMessage, error.message || "No pude conectar con el asistente. Revisa que el servidor esté activo.");
+        }
+      } finally {
+        sendButton.disabled = false;
+        promptInput.focus();
+        if (moduleTestDue && activeConversationId === requestConversationId) {
+          startModuleLearningTest(moduleTestDue.module.id, moduleTestDue.level);
+        }
+      }
+    }
+
+    promptInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const attachments = selectedAttachments.slice();
+      const text = promptInput.value.trim() || (attachments.length
+        ? "Analiza los archivos adjuntos y ayúdame a comprender su contenido."
+        : "");
+      if (!text) return;
+      const countsAsStudyProblem = pendingStudyProblem !== null && text.includes(pendingStudyProblem);
+      const learningModuleId = countsAsStudyProblem ? pendingStudyModuleId : null;
+      pendingStudyProblem = null;
+      pendingStudyModuleId = null;
+      promptInput.value = "";
+      promptInput.style.height = "auto";
+      sendChatMessage(text, { countsAsStudyProblem, learningModuleId, attachments });
+    });
+
+    if (new URLSearchParams(window.location.search).get("tour") === "1") {
+      window.setTimeout(startChatTour, 250);
+    }
+  </script>
+</body>
+</html>

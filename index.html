@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080b10">
+  <meta name="description" content="BrainMach integra pensamiento crítico e ingeniería para crear soluciones prácticas.">
+  <title>BrainMach | Asistente que construye</title>
+  <script>
+    if (["localhost", "127.0.0.1"].includes(location.hostname) && location.port !== "3000") {
+      location.replace(`http://${location.hostname}:3000${location.pathname}${location.search}${location.hash}`);
+    }
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #080b10;
+      --panel: #10151d;
+      --line: #26313d;
+      --white: #f2f6fb;
+      --muted: #a5b0bf;
+      --blue: #16b8ff;
+      --blue-deep: #0878dc;
+      --silver: #c9d2dc;
+      font-family: "Aptos", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--white);
+      background-color: var(--ink);
+      background-image: linear-gradient(rgba(35, 57, 77, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(35, 57, 77, .13) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+    a { color: inherit; text-decoration: none; }
+    .shell { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+
+    header {
+      position: relative;
+      z-index: 1;
+      border-bottom: 1px solid rgba(201, 210, 220, .12);
+      background: rgba(8, 11, 16, .88);
+    }
+    .nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
+    .wordmark { font-size: 19px; font-weight: 800; letter-spacing: .04em; }
+    .wordmark span { color: var(--blue); }
+    nav { display: flex; gap: clamp(18px, 4vw, 42px); align-items: center; color: var(--muted); font-size: 14px; }
+    nav a:hover, nav a:focus-visible { color: var(--white); }
+    .nav-cta { padding: 11px 16px; border: 1px solid var(--blue); color: var(--white); }
+
+    .hero {
+      min-height: 600px;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      align-items: center;
+      gap: 24px;
+      padding-block: 64px 72px;
+      animation: arrive .7s ease-out both;
+    }
+    .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--blue); font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--blue); }
+    h1 { max-width: 650px; margin: 22px 0 18px; font-size: clamp(42px, 6vw, 70px); line-height: 1.02; font-weight: 700; }
+    h1 em { color: var(--blue); font-style: normal; }
+    .intro { max-width: 490px; margin: 0; color: var(--muted); font-size: 17px; line-height: 1.7; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .button { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0 20px; border: 1px solid var(--blue); font-size: 14px; font-weight: 700; transition: background .2s, transform .2s; }
+    .button:hover { transform: translateY(-2px); }
+    .button-primary { color: #03111b; background: var(--blue); }
+    .button-primary:hover { background: #65d1ff; }
+    .button-secondary { color: var(--white); border-color: #536171; }
+    .button-secondary:hover { background: var(--panel); }
+    .visual { position: relative; display: grid; place-items: center; min-width: 0; }
+    .visual::before { content: ""; position: absolute; width: 74%; aspect-ratio: 1; border: 1px solid rgba(22, 184, 255, .25); border-radius: 50%; box-shadow: 0 0 80px rgba(8, 120, 220, .14), inset 0 0 50px rgba(8, 120, 220, .08); }
+    .visual img { position: relative; display: block; width: min(100%, 470px); height: auto; mix-blend-mode: screen; }
+
+    .band { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(13, 18, 25, .92); }
+    .section { padding-block: 78px; }
+    .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 30px; }
+    .section-heading h2 { margin: 0; font-size: clamp(28px, 4vw, 40px); }
+    .section-heading p { max-width: 410px; margin: 0; color: var(--muted); line-height: 1.6; }
+    .services { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); }
+    .service { min-height: 205px; padding: 25px; }
+    .service + .service { border-left: 1px solid var(--line); }
+    .service-number { color: var(--blue); font-size: 12px; font-weight: 700; letter-spacing: .12em; }
+    .service h3 { margin: 25px 0 10px; font-size: 20px; }
+    .service p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.65; }
+
+    .subjects-section { padding-block: 72px; }
+    .subjects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .subject-card { min-width: 0; display: flex; flex-direction: column; padding: 18px; border: 1px solid var(--line); background: rgba(16, 21, 29, .86); transition: border-color .2s, transform .2s; }
+    .subject-card:hover { border-color: #3d7993; transform: translateY(-2px); }
+    .subject-number { color: var(--blue); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .subject-card h3 { margin: 12px 0 6px; font-size: 18px; overflow-wrap: anywhere; }
+    .subject-count { margin: 0; color: var(--muted); font-size: 12px; }
+    .subject-problems { display: grid; gap: 5px; margin: 14px 0 18px; padding-left: 18px; color: #c6d0db; font-size: 12px; line-height: 1.5; }
+    .subject-problems li { overflow-wrap: anywhere; }
+    .subject-open { margin-top: auto; color: var(--cyan, #65e8ff); font-size: 12px; font-weight: 700; }
+    .subjects-status { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+    .contact { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding-block: 58px; }
+    .contact h2 { margin: 0 0 8px; font-size: clamp(26px, 4vw, 36px); }
+    .contact p { margin: 0; color: var(--muted); }
+    footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .footer-inner { min-height: 64px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+
+    @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 32px, 560px); }
+      .nav { min-height: auto; padding-block: 17px; align-items: flex-start; flex-direction: column; gap: 16px; }
+      nav { width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 12px 16px; font-size: 13px; }
+      .nav-cta { padding: 8px 10px; }
+      .hero { min-height: 0; grid-template-columns: 1fr; gap: 4px; padding-block: 64px 50px; }
+      .visual { grid-row: 1; }
+      .visual img { width: min(70%, 270px); }
+      .visual::before { width: 58%; }
+      .hero-copy { padding-top: 24px; }
+      .section { padding-block: 56px; }
+      .section-heading { align-items: flex-start; flex-direction: column; }
+      .services { grid-template-columns: 1fr; }
+      .service { min-height: 0; padding: 22px; }
+      .service + .service { border-left: 0; border-top: 1px solid var(--line); }
+      .service h3 { margin-top: 14px; }
+      .contact { align-items: flex-start; flex-direction: column; padding-block: 46px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell nav">
+      <a class="wordmark" href="#inicio" aria-label="BrainMach, inicio">Brain<span>Mach</span></a>
+      <nav aria-label="Navegación principal">
+        <a href="#inicio">Inicio</a>
+        <a href="#soluciones">Soluciones</a>
+        <a href="#materias">Materias</a>
+        <a href="#equipo">Enfoque</a>
+        <a class="nav-cta" href="asistente.html">Asistente</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="shell hero" id="inicio">
+      <div class="hero-copy">
+        <div class="eyebrow">Inteligencia + ingeniería</div>
+        <h1>Ideas que piensan.<br><em>Sistemas que hacen.</em></h1>
+        <p class="intro">Unimos inteligencia artificial e ingeniería para transformar desafíos complejos en soluciones concretas.</p>
+        <div class="actions">
+          <a class="button button-primary" href="asistente.html?tour=1">¿Cómo uso el asistente?</a>
+          <a class="button button-secondary" href="asistente.html">Hablar con el asistente</a>
+        </div>
+      </div>
+      <div class="visual">
+        <img src="/assets/brainmach-emblem.png" alt="Emblema BrainMach: un cerebro integrado a un engranaje">
+      </div>
+    </section>
+
+    <section class="band" id="soluciones">
+      <div class="shell section">
+        <div class="section-heading">
+          <h2>De la idea a la acción.</h2>
+          <p>Un enfoque integrado para diseñar tecnología útil, confiable y preparada para el mundo real.</p>
+        </div>
+        <div class="services">
+          <article class="service">
+            <div class="service-number">01 / INTELIGENCIA</div>
+            <h3>IA aplicada</h3>
+            <p>Modelos y herramientas inteligentes al servicio de problemas concretos.</p>
+          </article>
+          <article class="service">
+            <div class="service-number">02 / AUTOMATIZACIÓN</div>
+            <h3>Procesos conectados</h3>
+            <p>Flujos de trabajo más simples, precisos y eficientes.</p>
+          </article>
+          <article class="service" id="equipo">
+            <div class="service-number">03 / INGENIERÍA</div>
+            <h3>Diseño de sistemas</h3>
+            <p>Soluciones que combinan criterio técnico, creatividad y ejecución.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell subjects-section" id="materias" aria-labelledby="subjects-title">
+      <div class="section-heading">
+        <h2 id="subjects-title">Tus materias</h2>
+        <p>Los módulos y problemas que guardaste en el asistente aparecen aquí.</p>
+      </div>
+      <div class="subjects-grid" id="saved-modules" aria-live="polite">
+        <p class="subjects-status">Cargando materias guardadas...</p>
+      </div>
+    </section>
+
+    <section class="shell contact" id="contacto">
+      <div>
+        <h2>Construyamos algo mejor.</h2>
+        <p>¿Te
+          tienes un desafío para resolver? Empecemos por una conversación.</p>
+      </div>
+      <a class="button button-primary" href="mailto:mauest2605@gmail.com">Contáctanos
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <span>BrainMach</span>
+      <span>Inteligencia que construye.</span>
+      <span>© 2026 BrainMach</span>
+    </div>
+  </footer>
+  <script>
+    let savedModulesKey = null;
+    const savedModulesContainer = document.querySelector("#saved-modules");
+
+    async function renderSavedModules() {
+      try {
+        const sessionResponse = await fetch("/api/auth/session", { credentials: "same-origin" });
+        if (!sessionResponse.ok) throw new Error("No se pudo comprobar la sesión.");
+        const { user } = await sessionResponse.json();
+        savedModulesKey = user ? `brainmach:user:${user.id}:modules` : null;
+        if (!user) {
+          savedModulesContainer.replaceChildren();
+          const signInMessage = document.createElement("p");
+          signInMessage.className = "subjects-status";
+          signInMessage.textContent = "Inicia sesión en el asistente para ver las materias de tu cuenta.";
+          savedModulesContainer.append(signInMessage);
+          return;
+        }
+
+        const storedModules = localStorage.getItem(savedModulesKey);
+        const modules = storedModules ? JSON.parse(storedModules) : [];
+        if (
+          !Array.isArray(modules) ||
+          modules.some(
+            (module) =>
+              !module ||
+              typeof module.id !== "string" ||
+              typeof module.name !== "string" ||
+              !Array.isArray(module.problems) ||
+              module.problems.some((problem) => typeof problem !== "string")
+          )
+        ) {
+          throw new Error("El formato guardado de las materias no es válido.");
+        }
+
+        savedModulesContainer.replaceChildren();
+        if (modules.length === 0) {
+          const emptyMessage = document.createElement("p");
+          emptyMessage.className = "subjects-status";
+          emptyMessage.textContent = "Todavía no hay materias guardadas. Agrégalas desde el asistente.";
+          savedModulesContainer.append(emptyMessage);
+          return;
+        }
+
+        modules.forEach((module, index) => {
+          const card = document.createElement("a");
+          card.className = "subject-card";
+          card.href = `asistente.html?materia=${encodeURIComponent(module.id)}`;
+          const number = document.createElement("span");
+          number.className = "subject-number";
+          number.textContent = `Materia ${String(index + 1).padStart(2, "0")}`;
+          const name = document.createElement("h3");
+          name.textContent = module.name;
+          const count = document.createElement("p");
+          count.className = "subject-count";
+          count.textContent = `${module.problems.length} ${module.problems.length === 1 ? "problema guardado" : "problemas guardados"}`;
+          card.append(number, name, count);
+
+          if (module.problems.length > 0) {
+            const problemList = document.createElement("ul");
+            problemList.className = "subject-problems";
+            module.problems.slice(0, 3).forEach((problem) => {
+              const item = document.createElement("li");
+              item.textContent = problem;
+              problemList.append(item);
+            });
+            if (module.problems.length > 3) {
+              const more = document.createElement("li");
+              more.textContent = `Y ${module.problems.length - 3} más`;
+              problemList.append(more);
+            }
+            card.append(problemList);
+          }
+
+          const openLink = document.createElement("span");
+          openLink.className = "subject-open";
+          openLink.textContent = "Abrir en el asistente →";
+          card.append(openLink);
+          savedModulesContainer.append(card);
+        });
+      } catch (error) {
+        console.error("No se pudieron cargar las materias guardadas:", error);
+        savedModulesContainer.replaceChildren();
+        const errorMessage = document.createElement("p");
+        errorMessage.className = "subjects-status";
+        errorMessage.textContent = "No se pudieron cargar las materias guardadas. Abre la consola para ver el error.";
+        savedModulesContainer.append(errorMessage);
+      }
+    }
+
+    void renderSavedModules();
+    window.addEventListener("storage", (event) => {
+      if (event.key === savedModulesKey || event.key === null) void renderSavedModules();
+    });
+    window.addEventListener("pageshow", renderSavedModules);
+  </script>
+</body>
+</html>
